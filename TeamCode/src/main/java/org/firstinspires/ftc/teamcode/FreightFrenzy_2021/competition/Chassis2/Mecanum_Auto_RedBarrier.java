@@ -60,6 +60,8 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        PoseStorage.autoState = DriveMethod.poseState.RED;
+
         LF = hardwareMap.get(DcMotor.class, "LF");
         RF = hardwareMap.get(DcMotor.class, "RF");
         LB = hardwareMap.get(DcMotor.class, "LB");
@@ -112,23 +114,56 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
         //Variables
         double center = -1;
         int initialHeight = Slide.getCurrentPosition();
+        final int TARGET_HEIGHT;
         String visionResult = null;
         telemetry.addData(">", "Press Play to start op mode");
         telemetry.update();
 
         //Traj
         SampleMecanumDrive_Chassis2 drive = new SampleMecanumDrive_Chassis2(hardwareMap);
+        Pose2d startPose = FieldConstant.RED_BARRIER_STARTING_POSE;
+        drive.setPoseEstimate(startPose);
+
+        //Object Recognition Starts
+        ElapsedTime recogTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+        int recogDuration = 1500;
+        if (visionResult == null) {
+            recogTime.reset();
+        }
+        while (!opModeIsActive()){
+            if (tfod != null) {
+                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                if (updatedRecognitions != null) {
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    int i = 0;
+                    for (Recognition recognition : updatedRecognitions) {
+                        telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                        if (recognition.getLabel().equals("Duck")) {
+                            center = (recognition.getLeft() + recognition.getRight()) / 2.0;
+                        }
+                        i++;
+                    }
+                    telemetry.update();
+                }
+            }
+        }
 
         waitForStart();
+        recogDuration -= recogTime.milliseconds();
         if(opModeIsActive()) {
-
-            ElapsedTime recogTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
             runtime.reset();
-            if (visionResult == null) {
-                recogTime.reset();
+            if(recogDuration > 1000){
+                recogDuration = 1500;
             }
-
-            while (recogTime.milliseconds() <= 2000.0) {
+            else if (recogDuration > 500) {
+                recogDuration = 1000;
+            }
+            else {
+                recogDuration = 0;
+            }
+            telemetry.addData("recogDuration", recogDuration);
+            telemetry.update();
+            while (runtime.milliseconds() < recogDuration){
                 if (tfod != null) {
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
@@ -145,12 +180,13 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
                     }
                 }
             }
-            Pose2d startPose = FieldConstant.RED_BARRIER_STARTING_POSE;
-            drive.setPoseEstimate(startPose);
+
             if (center < 0) {
                 visionResult = "RIGHT";
+                TARGET_HEIGHT = initialHeight + 1150;
             } else if (center < 402) {
                 visionResult = "LEFT";
+                TARGET_HEIGHT = initialHeight;
                 Trajectory plateTraj0 = drive.trajectoryBuilder(startPose,true)
                         .strafeLeft(5)
                         .build();
@@ -158,6 +194,7 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
                 startPose = plateTraj0.end();
             } else {
                 visionResult = "MIDDLE";
+                TARGET_HEIGHT = initialHeight + 500;
                 Trajectory plateTraj0 = drive.trajectoryBuilder(startPose,true)
                         .strafeLeft(5)
                         .build();
@@ -180,30 +217,11 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
             //MOTION TO PLATE
             Trajectory plateTraj3 = drive.trajectoryBuilder(plateTraj2.end())
                     .lineToLinearHeading(new Pose2d(7.875, -23.75, toRadians(0)))
+                    .addTemporalMarker(1, () -> {
+                        DriveMethod.slideUp(Intake, Rotate, Slide, TARGET_HEIGHT);
+                    })
                     .build();
             drive.followTrajectory(plateTraj3);
-
-            //ROTATE
-            Intake.setPower(0.8);
-            sleep(300);
-            Intake.setPower(0);
-            Rotate.setPosition(0.85);
-
-            //SLIDE UP
-            if (visionResult == "LEFT") {
-                Slide.setTargetPosition(initialHeight);
-                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Slide.setPower(0.8);
-            } else if (visionResult == "MIDDLE") {
-                Slide.setTargetPosition(initialHeight + 500);
-                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Slide.setPower(0.8);
-            } else if (visionResult == "RIGHT") {
-                Slide.setTargetPosition(initialHeight + 1150);
-                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Slide.setPower(0.8);
-            }
-            sleep(600);
 
             //CLOSER TO PLATE
             Trajectory closerTraj = drive.trajectoryBuilder(plateTraj3.end())
@@ -213,19 +231,13 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
             drive.setPoseEstimate(closerTraj.end());
 
             //DUMP AND SLIDE DOWN
-            Rotate.setPosition(0.25);
-            sleep(800);
-            Rotate.setPosition(0.90);
+            DriveMethod.dump(Rotate);
             sleep(500);
-            Slide.setTargetPosition(initialHeight);
-            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            Slide.setPower(0.8);
-            sleep(500);
-            Rotate.setPosition(0.95);
+
 
             //BACK TO WALL
             if(visionResult == "LEFT"){
-                Trajectory wallTrajR1 = drive.trajectoryBuilder(closerTraj.end())
+                Trajectory wallTrajR1 = drive.trajectoryBuilder(plateTraj3.end())
                         .lineToLinearHeading(new Pose2d(14.8, -23.75, toRadians(-90)))
                         .build();
                 drive.followTrajectory(wallTrajR1);
@@ -237,6 +249,9 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
             }
             Trajectory wallTraj1 = drive.trajectoryBuilder(drive.getPoseEstimate())
                     .lineToLinearHeading(new Pose2d(6.5, -65, toRadians(0)))
+                    .addTemporalMarker(1, () -> {
+                        DriveMethod.slideDown(Slide, Rotate, initialHeight);
+                    })
                     .build();
             drive.followTrajectory(wallTraj1);
 
@@ -295,7 +310,6 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
 //
 
             PoseStorage.currentPose = drive.getPoseEstimate();
-            PoseStorage.state = DriveMethod.poseState.RED;
         }
 
     }

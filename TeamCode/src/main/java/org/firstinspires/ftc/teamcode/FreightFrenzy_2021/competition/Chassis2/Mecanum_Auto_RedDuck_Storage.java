@@ -55,6 +55,8 @@ public class Mecanum_Auto_RedDuck_Storage extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        PoseStorage.autoState = DriveMethod.poseState.RED;
+
         LF = hardwareMap.get(DcMotor.class, "LF");
         RF = hardwareMap.get(DcMotor.class, "RF");
         LB = hardwareMap.get(DcMotor.class, "LB");
@@ -110,28 +112,57 @@ public class Mecanum_Auto_RedDuck_Storage extends LinearOpMode {
         //Variables
         double center = -1;
         int initialHeight = Slide.getCurrentPosition();
+        final int TARGET_HEIGHT;
         String visionResult = null;
-        telemetry.addData(">", "Press Play to start op mode");
-        telemetry.update();
+
 
         //Traj
         SampleMecanumDrive_Chassis2 drive = new SampleMecanumDrive_Chassis2(hardwareMap);
         Pose2d startPose = new Pose2d(-41, -61.5, toRadians(-90));
         drive.setPoseEstimate(startPose);
-        Trajectory myTrajectory1 = drive.trajectoryBuilder(startPose,true)
-                .splineToConstantHeading(new Vector2d(-11.875, -43), toRadians(90))
-                .build();
+        telemetry.addData(">", "Press Play to start op mode");
+        telemetry.update();
+
+        //Object Recognition Starts
+        ElapsedTime recogTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+        int recogDuration = 1500;
+        if (visionResult == null) {
+            recogTime.reset();
+        }
+        while (!opModeIsActive()){
+            if (tfod != null) {
+                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                if (updatedRecognitions != null) {
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    int i = 0;
+                    for (Recognition recognition : updatedRecognitions) {
+                        telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                        if (recognition.getLabel().equals("Duck")) {
+                            center = (recognition.getLeft() + recognition.getRight()) / 2.0;
+                        }
+                        i++;
+                    }
+                    telemetry.update();
+                }
+            }
+        }
 
         waitForStart();
+        recogDuration -= recogTime.milliseconds();
         if(opModeIsActive()) {
-
-            ElapsedTime recogTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
             runtime.reset();
-            if (visionResult == null) {
-                recogTime.reset();
+            if(recogDuration > 1000){
+                recogDuration = 1500;
             }
-
-            while (recogTime.milliseconds() <= 2000.0) {
+            else if (recogDuration > 500) {
+                recogDuration = 1000;
+            }
+            else {
+                recogDuration = 0;
+            }
+            telemetry.addData("recogDuration", recogDuration);
+            telemetry.update();
+            while (runtime.milliseconds() < recogDuration){
                 if (tfod != null) {
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
@@ -148,12 +179,16 @@ public class Mecanum_Auto_RedDuck_Storage extends LinearOpMode {
                     }
                 }
             }
+
             if (center < 0) {
                 visionResult = "RIGHT";
+                TARGET_HEIGHT = initialHeight + 1150;
             } else if (center < 402) {
                 visionResult = "LEFT";
+                TARGET_HEIGHT = initialHeight;
             } else {
                 visionResult = "MIDDLE";
+                TARGET_HEIGHT = initialHeight + 500;
             }
             telemetry.addLine(visionResult);
             telemetry.update();
@@ -165,76 +200,44 @@ public class Mecanum_Auto_RedDuck_Storage extends LinearOpMode {
             drive.followTrajectory(duckTraj);
             sleep(500);
 
-            //ROTATE DUCK
-            drive.setMotorPowers(0.07, 0.07,0.07,0.07);
-            sleep(600);
-            drive.setMotorPowers(0, 0,0,0);
-            Spin.setPower(-0.5);
-            sleep(3500);
-            Spin.setPower(0.0);
+            DriveMethod.spinDuck(drive, Spin, PoseStorage.autoState);
 
             Pose2d wall = new Pose2d(-56.91, -56.91, drive.getExternalHeading());// Math.toRadians(-180)
             drive.setPoseEstimate(wall);
 
             //MOTION TO PLATE
             Trajectory plateTraj1 = drive.trajectoryBuilder(wall, true)
-                    .splineToLinearHeading(new Pose2d(-59, -23.75, toRadians(180)), toRadians(90))
-                    .build();
+                    .splineToLinearHeading(new Pose2d(-59, -26, toRadians(180)), toRadians(90))
+                    .build();//was -59, -23.75
             drive.followTrajectory(plateTraj1);
 
             Trajectory plateTraj2 = drive.trajectoryBuilder(plateTraj1.end())
-                    .back(26.375)
-                    .build();
+                    .back(29)
+                    .addDisplacementMarker(27, () -> {
+                        DriveMethod.slideUp(Intake, Rotate, Slide, TARGET_HEIGHT);
+                    })
+                    .build();//was 26.375
             drive.followTrajectory(plateTraj2);
 
-            Rotate.setPosition(0.8);
-
-            //SLIDE UP
-            if (visionResult == "LEFT") {
-                Slide.setTargetPosition(initialHeight);
-                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Slide.setPower(0.8);
-            } else if (visionResult == "MIDDLE") {
-                Slide.setTargetPosition(initialHeight + 500);
-                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Slide.setPower(0.8);
-            } else if (visionResult == "RIGHT") {
-                Slide.setTargetPosition(initialHeight + 1150);
-                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Slide.setPower(0.8);
-            }
-            sleep(600);
-
-            //CLOSER TO PLATE
-            Trajectory closeTraj = drive.trajectoryBuilder(plateTraj2.end())
-                    .back(2.5)
-                    .build();
-            drive.followTrajectory(closeTraj);
-
             //DUMP AND SLIDE DOWN
-            Rotate.setPosition(0.25);
-            sleep(800);
-            Rotate.setPosition(0.90);
-            sleep(500);
-            Slide.setTargetPosition(initialHeight);
-            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            Slide.setPower(0.8);
-            sleep(500);
-            Rotate.setPosition(0.95);
+            DriveMethod.dump(Rotate);
+            sleep(200);
 
             //BACK TO STORAGE UNIT & PARK
-            Trajectory parkTraj1 = drive.trajectoryBuilder(closeTraj.end())
+            Trajectory parkTraj1 = drive.trajectoryBuilder(plateTraj2.end())
                     .forward(31)
+                    .addTemporalMarker(1, () -> {
+                        DriveMethod.slideDown(Slide, Rotate, initialHeight);
+                    })
                     .build();
             drive.followTrajectory(parkTraj1);
             Trajectory parkTraj2 = drive.trajectoryBuilder(parkTraj1.end())
-                    .strafeLeft(13)
+                    .strafeLeft(14)
                     .build();
             drive.followTrajectory(parkTraj2);
             sleep(500);
 
             PoseStorage.currentPose = drive.getPoseEstimate();
-            PoseStorage.state = DriveMethod.poseState.RED;
 
         }
 

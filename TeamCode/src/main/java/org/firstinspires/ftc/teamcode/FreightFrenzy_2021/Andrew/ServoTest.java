@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name = "Servo Test", group = "Testing")
-
+@Disabled
 
 public class ServoTest extends LinearOpMode{
     private CRServo Rotate = null;

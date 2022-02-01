@@ -192,7 +192,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                 releasedRB1 = true;
             }
 
-            if(gamepad1.a){
+            if(gamepad1.a && !gamepad1.start){
                 if(releasedA1) {
                     speed = 0.25;
                     releasedA1 = false;
@@ -201,7 +201,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                 releasedA1 = true;
             }
 
-            if(gamepad1.b){
+            if(gamepad1.b && !gamepad1.start){
                 if(releasedB1) {
                     speed = 0.6;
                     releasedB1 = false;
@@ -237,7 +237,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             //SHARED HUB
             if(gamepad1.y) {
                 if (releasedY1) {
-                    if (PoseStorage.state == DriveMethod.poseState.BLUE || PoseStorage.state == DriveMethod.poseState.BLUE_WAREHOUSE || PoseStorage.state == DriveMethod.poseState.BLUE_OTHERS) {
+                    if (PoseStorage.autoState == DriveMethod.poseState.BLUE) {
                         chassis.setPoseEstimate(FieldConstant.SHARED_BLUE_ENTER_POSE);
                         Trajectory sharedTraj1 = chassis.trajectoryBuilder(chassis.getPoseEstimate(), true)
                                 .lineTo(new Vector2d(64.75, 18))
@@ -247,7 +247,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                                 .lineToLinearHeading(FieldConstant.SHARED_BLUE_END_POSE)
                                 .build();
                         chassis.followTrajectory(sharedTraj2);
-                    } else if (PoseStorage.state == DriveMethod.poseState.RED || PoseStorage.state == DriveMethod.poseState.RED_WAREHOUSE || PoseStorage.state == DriveMethod.poseState.RED_OTHERS) {
+                    } else if (PoseStorage.autoState == DriveMethod.poseState.RED) {
                         chassis.setPoseEstimate(FieldConstant.SHARED_RED_ENTER_POSE);
                         Trajectory sharedTraj1 = chassis.trajectoryBuilder(chassis.getPoseEstimate(), true)
                                 .lineTo(new Vector2d(64.75, -18))
@@ -271,8 +271,12 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             }
 
             //////////////GAMEPAD 2//////////////
-            if(gamepad2.a){
+            if(gamepad2.a && !gamepad2.start){
                 if(releasedA2) {
+                    LF.setPower(0);
+                    RF.setPower(0);
+                    LB.setPower(0);
+                    RB.setPower(0);
                     rotateWithSpeed(Rotate,0.95, rotateSpeed);
                     Slide.setTargetPosition(initialHeight);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -283,8 +287,12 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             } else if(!releasedA2){
                 releasedA2 = true;
             }
-            if(gamepad2.b){
+            if(gamepad2.b && !gamepad2.start){
                 if(releasedB2) {
+                    LF.setPower(0);
+                    RF.setPower(0);
+                    LB.setPower(0);
+                    RB.setPower(0);
                     Slide.setTargetPosition(initialHeight + 500);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(1);
@@ -298,6 +306,10 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
 
             if(gamepad2.y){
                 if(releasedY2) {
+                    LF.setPower(0);
+                    RF.setPower(0);
+                    LB.setPower(0);
+                    RB.setPower(0);
                     Slide.setTargetPosition(initialHeight + 1150);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(1);
@@ -447,10 +459,10 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                 releasedRT2 = true;
             }
 
-            LFPower  = Range.clip(gamepad1.left_trigger + speed*(drive + rotate - strafe), -1.0, 1.0) ;
-            LBPower  = Range.clip(gamepad1.left_trigger + speed*(drive + rotate + strafe), -1.0, 1.0) ;
-            RFPower  = Range.clip(gamepad1.right_trigger + speed*(drive - rotate + strafe), -1.0, 1.0) ;
-            RBPower  = Range.clip(gamepad1.right_trigger + speed*(drive - rotate - strafe), -1.0, 1.0) ;
+            LFPower  = Range.clip(speed*(drive + rotate - strafe), -1.0, 1.0) ;
+            LBPower  = Range.clip(speed*(drive + rotate + strafe), -1.0, 1.0) ;
+            RFPower  = Range.clip(speed*(drive - rotate + strafe), -1.0, 1.0) ;
+            RBPower  = Range.clip(speed*(drive - rotate - strafe), -1.0, 1.0) ;
 
             LF.setPower(LFPower);
             RF.setPower(RFPower);
@@ -474,7 +486,6 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             telemetry.addData("RF: ", RF.getCurrentPosition());
             telemetry.addData("LB: ", LB.getCurrentPosition());
             telemetry.addData("RB: ", RB.getCurrentPosition());
-
 
             telemetry.update();
 

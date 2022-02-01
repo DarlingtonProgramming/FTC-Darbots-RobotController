@@ -2,7 +2,9 @@ package org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -15,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive_Chassis2;
 
 import static java.lang.Thread.sleep;
 
@@ -520,4 +523,76 @@ public class DriveMethod {
         Spin.setPower(0);
         return Spin.isBusy();
     }
+
+    public static void dump(Servo Rotate){
+        Rotate.setPosition(0.25);
+        try {
+            sleep(800);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Rotate.setPosition(0.90);
+    }
+
+    public static void slideDown(DcMotor Slide, Servo Rotate, int initialHeight) {
+        Slide.setTargetPosition(initialHeight);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Slide.setPower(0.8);
+        try {
+            sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Rotate.setPosition(0.95);
+    }
+
+    public static void slideUp(DcMotor Intake, Servo Rotate, DcMotor Slide, int targetHeight) {
+//        Intake.setPower(0.8);
+//        try {
+//            sleep(300);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//        Intake.setPower(0);
+        Rotate.setPosition(0.8);
+        Slide.setTargetPosition(targetHeight);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        Slide.setPower(0.8);
+    }
+
+    public static void spinDuck(SampleMecanumDrive_Chassis2 drive, CRServo Spin, poseState alliance){
+        int spinFactor = 1;
+        if(alliance == poseState.RED){
+            spinFactor = -1;
+        }
+        drive.setMotorPowers(0.07, 0.07,0.07,0.07);
+        try {
+            sleep(650);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        drive.setMotorPowers(0, 0,0,0);
+        Spin.setPower(0.4 * spinFactor);
+        try {
+            sleep(3500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Spin.setPower(0.0);
+    }
+
+
+    public static void initialize(Servo Rotate, DcMotor Slide) {
+        //initialize position
+        Slide.setPower(0.15);
+        try {
+            sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Slide.setPower(0.0);
+        Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        Rotate.setPosition(0.85);
+    }
+
 }

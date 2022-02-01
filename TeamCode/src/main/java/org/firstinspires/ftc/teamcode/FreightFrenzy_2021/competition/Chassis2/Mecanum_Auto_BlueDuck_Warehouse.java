@@ -17,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.DriveMethod;
+import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.FieldConstant;
 import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive_Chassis2;
 import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
@@ -54,6 +55,8 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        PoseStorage.autoState = DriveMethod.poseState.BLUE;
+
         LF = hardwareMap.get(DcMotor.class, "LF");
         RF = hardwareMap.get(DcMotor.class, "RF");
         LB = hardwareMap.get(DcMotor.class, "LB");
@@ -95,39 +98,71 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
         Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Rotate.setPosition(0.85);
 
+        //Variables
+        double center = -1;
+        int initialHeight = Slide.getCurrentPosition();
+        final int TARGET_HEIGHT;
+        String visionResult = null;
+
         //Vision
         initVuforia();
         initTfod();
         if (tfod != null) {
             tfod.activate();
-            tfod.setZoom(1, 16.0/9.0);
+            tfod.setZoom(1, 16.0 / 9.0);
         }
-
-        //Variables
-        double center = -1;
-        int initialHeight = Slide.getCurrentPosition();
-        String visionResult = null;
-        telemetry.addData(">", "Press Play to start op mode");
-        telemetry.update();
 
         //Traj
         SampleMecanumDrive_Chassis2 drive = new SampleMecanumDrive_Chassis2(hardwareMap);
-        Pose2d startPose = new Pose2d(-41, 62.125, toRadians(90));
+        Pose2d startPose = FieldConstant.BLUE_DUCK_STARTING_POSE;
         drive.setPoseEstimate(startPose);
-        Trajectory myTrajectory1 = drive.trajectoryBuilder(startPose,true)
-                .splineToConstantHeading(new Vector2d(-11.875, 43), toRadians(-90))
+        Trajectory duckTraj = drive.trajectoryBuilder(startPose,true)
+                .splineToLinearHeading(new Pose2d(-56.91, 56.91, toRadians(135)), toRadians(0))
                 .build();
 
-        waitForStart();
-        if(opModeIsActive()) {
+        telemetry.addData(">", "Press Play to start op mode");
+        telemetry.update();
 
-            ElapsedTime recogTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-            runtime.reset();
-            if (visionResult == null) {
-                recogTime.reset();
+        //Object Recognition Starts
+        ElapsedTime recogTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+        int recogDuration = 1500;
+        if (visionResult == null) {
+            recogTime.reset();
+        }
+        while (!opModeIsActive()){
+            if (tfod != null) {
+                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                if (updatedRecognitions != null) {
+                    telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    int i = 0;
+                    for (Recognition recognition : updatedRecognitions) {
+                        telemetry.addData(String.format("label (%d)", i), recognition.getLabel());
+                        if (recognition.getLabel().equals("Duck")) {
+                            center = (recognition.getLeft() + recognition.getRight()) / 2.0;
+                        }
+                        i++;
+                    }
+                    telemetry.update();
+                }
             }
+        }
 
-            while (recogTime.milliseconds() <= 2000.0) {
+        waitForStart();
+        recogDuration -= recogTime.milliseconds();
+        if(opModeIsActive()) {
+            runtime.reset();
+            if(recogDuration > 1000){
+                recogDuration = 1500;
+            }
+            else if (recogDuration > 500) {
+                recogDuration = 1000;
+            }
+            else {
+                recogDuration = 0;
+            }
+            telemetry.addData("recogDuration", recogDuration);
+            telemetry.update();
+            while (runtime.milliseconds() < recogDuration){
                 if (tfod != null) {
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                     if (updatedRecognitions != null) {
@@ -144,31 +179,25 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
                     }
                 }
             }
+
             if (center < 0) {
                 visionResult = "LEFT";
+                TARGET_HEIGHT = initialHeight;
             } else if (center < 273) {
                 visionResult = "MIDDLE";
+                TARGET_HEIGHT = initialHeight + 500;
             } else {
                 visionResult = "RIGHT";
+                TARGET_HEIGHT = initialHeight + 1150;
             }
             telemetry.addLine(visionResult);
             telemetry.update();
 
             //MOTION TO DUCK
-            Trajectory duckTraj = drive.trajectoryBuilder(startPose,true)
-                    .splineToLinearHeading(new Pose2d(-56.91, 56.91, toRadians(135)), toRadians(0))
-                    .build();
             drive.followTrajectory(duckTraj);
-            sleep(500);
+            sleep(300);
 
-            //ROTATE DUCK
-            drive.setMotorPowers(0.07, 0.07,0.07,0.07);
-            sleep(600);
-            drive.setMotorPowers(0, 0,0,0);
-            Spin.setPower(0.5);
-            sleep(3500);
-            Spin.setPower(0.0);
-
+            DriveMethod.spinDuck(drive, Spin, PoseStorage.autoState);
 
             Pose2d wall = new Pose2d(-56.91, 56.91, drive.getExternalHeading()); //Math.toRadians(90
             drive.setPoseEstimate(wall);
@@ -180,46 +209,25 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
             drive.followTrajectory(wallTraj);
 
             Trajectory plateTraj = drive.trajectoryBuilder(wallTraj.end())
-                    .back(26.375)
+                    .back(27.875)
+                    .addDisplacementMarker(25, () -> {
+                        DriveMethod.slideUp(Intake, Rotate, Slide, TARGET_HEIGHT);
+                    })
                     .build();
             drive.followTrajectory(plateTraj);
-
-            //SLIDE UP
-            if (visionResult == "LEFT") {
-                Slide.setTargetPosition(initialHeight);
-                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Slide.setPower(0.8);
-            } else if (visionResult == "MIDDLE") {
-                Slide.setTargetPosition(initialHeight + 500);
-                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Slide.setPower(0.8);
-            } else if (visionResult == "RIGHT") {
-                Slide.setTargetPosition(initialHeight + 1150);
-                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                Slide.setPower(0.8);
-            }
-            sleep(600);
-
-            //CLOSER TO PLATE
-            Trajectory closeTraj = drive.trajectoryBuilder(plateTraj.end())
-                    .back(2.5)
-                    .build();
-            drive.followTrajectory(closeTraj);
+            sleep(300);
 
             //DUMP AND SLIDE DOWN
-            Rotate.setPosition(0.25);
-            sleep(800);
-            Rotate.setPosition(0.90);
-            sleep(500);
-            Slide.setTargetPosition(initialHeight);
-            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            Slide.setPower(0.8);
-            sleep(500);
-            Rotate.setPosition(0.95);
+            DriveMethod.dump(Rotate);
+            sleep(200);
+
 
             //BACK TO WAREHOUSE & PARK
-            Trajectory parkTraj1 = drive.trajectoryBuilder(closeTraj.end())
+            Trajectory parkTraj1 = drive.trajectoryBuilder(plateTraj.end())
                     .strafeRight(30)
+                    .addTemporalMarker(1, () -> {
+                        DriveMethod.slideDown(Slide, Rotate, initialHeight);
+                    })
                     .build();
             drive.followTrajectory(parkTraj1);
             Trajectory parkTraj2 = drive.trajectoryBuilder(parkTraj1.end())
@@ -227,7 +235,7 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
                     .build();
             drive.followTrajectory(parkTraj2);
             Trajectory parkTraj3 = drive.trajectoryBuilder(parkTraj2.end())
-                    .lineToLinearHeading(new Pose2d(-31.625, 44.75, toRadians(0)))
+                    .lineToLinearHeading(new Pose2d(-31.625, 47.75, toRadians(0)))
                     .build();
             drive.followTrajectory(parkTraj3);
             Trajectory parkTraj4 = drive.trajectoryBuilder(parkTraj3.end())
@@ -237,7 +245,7 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
             sleep(500);
 
             PoseStorage.currentPose = drive.getPoseEstimate();
-            PoseStorage.state = DriveMethod.poseState.BLUE;
+
         }
 
     }

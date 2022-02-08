@@ -261,55 +261,63 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
                     .build();
             drive.followTrajectory(wallTraj2);
 
-//            //Collect another block
-//            Intake.setPower(1);
-//            sleep(600);
-//            Intake.setPower(0);
-//            Rotate.setPosition(1);
-//            Intake.setPower(-0.8);
-//            sleep(500);
-//            Intake.setPower(0);
-//            Rotate.setPosition(0.95);
-//            Trajectory collTraj1 = drive.trajectoryBuilder(wallTraj2.end())
-//                    .back(35)
-//                    .build();
-//            drive.followTrajectory(collTraj1);
-//
-//            Trajectory collTraj2 = drive.trajectoryBuilder(collTraj1.end())
-//                    .lineToLinearHeading(new Pose2d(-4.25, 40.88, toRadians(65.99)))
-//                    .build();
-//            drive.followTrajectory(collTraj2);
-//
-//            Intake.setPower(0.8);
-//            sleep(300);
-//            Intake.setPower(0);
-//            Slide.setTargetPosition(initialHeight + 1150);
-//            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            Slide.setPower(0.8);
-//            sleep(600);
-//            Rotate.setPosition(0.25);
-//            sleep(800);
-//            Rotate.setPosition(0.90);
-//            sleep(500);
-//            Slide.setTargetPosition(initialHeight);
-//            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            Slide.setPower(0.8);
-//            sleep(500);
-//            Rotate.setPosition(0.95);
-//
-//            Trajectory collTraj3 = drive.trajectoryBuilder(collTraj2.end())
-//                    .lineToLinearHeading(new Pose2d(6.5, 65, toRadians(0)))
-//                    .build();
-//            drive.followTrajectory(collTraj3);
-//
-//            Trajectory collTraj4 = drive.trajectoryBuilder(collTraj3.end())
-//                    .forward(36)
-//                    .build();
-//            drive.followTrajectory(collTraj4);
-//            sleep(300);
-//
+            //Collect another block
+            Intake.setPower(1);
+            sleep(600);
+            Intake.setPower(0);
+            Rotate.setPosition(1);
+            Intake.setPower(-0.8);
+            sleep(500);
+            Intake.setPower(0);
+            Rotate.setPosition(0.7);
+            Trajectory collTraj1 = drive.trajectoryBuilder(wallTraj2.end())
+                    .back(35)
+                    .build();
+            drive.followTrajectory(collTraj1);
+
+            Trajectory collTraj2 = drive.trajectoryBuilder(collTraj1.end())
+                    .lineToLinearHeading(new Pose2d(-4.25, 40.88, toRadians(60)))
+                    .build();
+            drive.followTrajectory(collTraj2);
+
+            Intake.setPower(0.8);
+            sleep(300);
+            Intake.setPower(0);
+            Slide.setTargetPosition(initialHeight + 1150);
+            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            Slide.setPower(0.8);
+            sleep(600);
+            Rotate.setPosition(0.25);
+            sleep(800);
+            Rotate.setPosition(0.90);
+            sleep(500);
+            Slide.setTargetPosition(initialHeight);
+            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            Slide.setPower(0.8);
+            sleep(500);
+            Rotate.setPosition(0.95);
+
+            Trajectory collTraj3 = drive.trajectoryBuilder(collTraj2.end())
+                    .lineToLinearHeading(new Pose2d(6.5, 67.5, toRadians(0)))
+                    .build();
+            drive.followTrajectory(collTraj3);
+
+            Trajectory collTraj4 = drive.trajectoryBuilder(collTraj3.end())
+                    .forward(36)
+                    .build();
+            drive.followTrajectory(collTraj4);
+            sleep(300);
 
             PoseStorage.currentPose = drive.getPoseEstimate();
+
+            //Collect the third block
+            Intake.setPower(1);
+            sleep(600);
+            Intake.setPower(0);
+            Rotate.setPosition(1);
+            Intake.setPower(-0.8);
+            sleep(500);
+            Intake.setPower(0);
         }
 
     }

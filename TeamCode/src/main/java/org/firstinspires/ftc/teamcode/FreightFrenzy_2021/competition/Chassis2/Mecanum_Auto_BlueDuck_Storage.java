@@ -206,7 +206,7 @@ public class Mecanum_Auto_BlueDuck_Storage extends LinearOpMode {
                     .build();
             drive.followTrajectory(plateTraj1);
             Trajectory plateTraj2 = drive.trajectoryBuilder(plateTraj1.end(),true)
-                    .back(27.875)
+                    .back(28)
                     .addDisplacementMarker(25, () -> {
                         DriveMethod.slideUp(Intake, Rotate, Slide, TARGET_HEIGHT);
                     })

@@ -565,9 +565,9 @@ public class DriveMethod {
         if(alliance == poseState.RED){
             spinFactor = -1;
         }
-        drive.setMotorPowers(0.07, 0.07,0.07,0.07);
+        drive.setMotorPowers(0.06, 0.06,0.06,0.06);
         try {
-            sleep(650);
+            sleep(800);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -594,5 +594,10 @@ public class DriveMethod {
         Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         Rotate.setPosition(0.85);
     }
+
+//    public static Pose2d autoCalibrationPose (double measuredDistance, double xFromCenter, double yFromCenter, double angle){
+//        double l = 70.875;
+//        double a =
+//    }
 
 }

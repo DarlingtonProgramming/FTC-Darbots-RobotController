@@ -3,14 +3,17 @@ package org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.Chassis2;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.DriveMethod;
 import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.FieldConstant;
 import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage;
@@ -28,7 +31,11 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
     private CRServo Spin = null;
     private Servo Rotate = null;
     private Servo Arm = null;
+
+    private DistanceSensor RangeSensor = null;
+
     private ElapsedTime runtime = new ElapsedTime();
+    private ElapsedTime blockTime = new ElapsedTime();
 
     double rotate = 0;
     double speed = 0.6;
@@ -46,6 +53,8 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
         Spin = hardwareMap.get(CRServo.class, "Spin");
         Rotate = hardwareMap.get(Servo.class, "Rotate");
         Arm = hardwareMap.get(Servo.class, "Arm");
+
+        RangeSensor = hardwareMap.get(DistanceSensor.class, "Range");
 
         LF.setDirection(DcMotor.Direction.REVERSE);
         RF.setDirection(DcMotor.Direction.FORWARD);
@@ -111,6 +120,8 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
         boolean releasedBX1 = true;
         boolean releasedBB1 = true;
 
+        boolean holdBlock = false;
+
         boolean releasedBack2 =true;
         boolean releasedStart2 =true;
         double rotateSpeed = 1;
@@ -120,8 +131,12 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
         boolean toggleLB2 = true;
         boolean toggleLT2 = true;
 
+        double block = 0;
+
         while (opModeIsActive()) {
             runtime.reset();
+
+            double currentIntake = Intake.getCurrentPosition();
             chassis.update();
 
             // Retrieve your pose
@@ -171,8 +186,9 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             }
             if (gamepad1.left_bumper) {
                 if (releasedLB1 && Slide.getCurrentPosition() < initialHeight + 30){
-                    intakePower = 0.6;
+                    intakePower = 0.8;
                     telemetry.addLine("INTAKE STARTS");
+                    blockTime.reset();
                     releasedLB1 = false;
                 }
             } else if (!releasedLB1){
@@ -182,7 +198,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             }
             if (gamepad1.right_bumper) {
                 if (releasedRB1 && Slide.getCurrentPosition() < initialHeight + 30){
-                    intakePower = -0.6;
+                    intakePower = -0.8;
                     telemetry.addLine("INTAKE REVERSE STARTS");
                     releasedRB1 = false;
                 }
@@ -192,7 +208,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                 releasedRB1 = true;
             }
 
-            if(gamepad1.a && !gamepad1.start){
+            if(gamepad1.a && !gamepad1.start && !gamepad2.start){
                 if(releasedA1) {
                     speed = 0.25;
                     releasedA1 = false;
@@ -201,7 +217,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                 releasedA1 = true;
             }
 
-            if(gamepad1.b && !gamepad1.start){
+            if(gamepad1.b && !gamepad1.start && !gamepad2.start){
                 if(releasedB1) {
                     speed = 0.6;
                     releasedB1 = false;
@@ -271,7 +287,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             }
 
             //////////////GAMEPAD 2//////////////
-            if(gamepad2.a && !gamepad2.start){
+            if(gamepad2.a && !gamepad2.start && !gamepad1.start){
                 if(releasedA2) {
                     LF.setPower(0);
                     RF.setPower(0);
@@ -287,7 +303,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             } else if(!releasedA2){
                 releasedA2 = true;
             }
-            if(gamepad2.b && !gamepad2.start){
+            if(gamepad2.b && !gamepad2.start && !gamepad1.start){
                 if(releasedB2) {
                     LF.setPower(0);
                     RF.setPower(0);
@@ -486,6 +502,37 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             telemetry.addData("RF: ", RF.getCurrentPosition());
             telemetry.addData("LB: ", LB.getCurrentPosition());
             telemetry.addData("RB: ", RB.getCurrentPosition());
+            telemetry.addLine();
+            double intakeSpeed = (Intake.getCurrentPosition()-currentIntake)/(runtime.seconds());
+
+            telemetry.addData("INTAKE ENCODER VALUE: ", Intake.getCurrentPosition());
+            telemetry.addData("INTAKE DIFFERENCE: ", Intake.getCurrentPosition()-currentIntake);
+            telemetry.addData("INTAKE SPEED VALUE: ", intakeSpeed);
+            if(Intake.getPower() > 0 && intakeSpeed < 300){
+                blockTime.reset();
+            }
+            if(Intake.getPower() == 0 && intakeSpeed > 100){
+                blockTime.reset();
+            }
+            if(Intake.getPower() < 0){
+                blockTime.reset();
+            }
+            if(intakeSpeed < 300 && blockTime.milliseconds() > 400 && Intake.getPower() != 0){
+                if(!holdBlock) {
+                    block++;
+                }
+                holdBlock = true;
+            }
+            else if(holdBlock){
+                holdBlock = false;
+                blockTime.reset();
+            }
+            telemetry.addData("BLOCK VALUE: ", block);
+
+            telemetry.addData("range", String.format("%.01f mm", RangeSensor.getDistance(DistanceUnit.MM)));
+            telemetry.addData("range", String.format("%.01f cm", RangeSensor.getDistance(DistanceUnit.CM)));
+            telemetry.addData("range", String.format("%.01f in", RangeSensor.getDistance(DistanceUnit.INCH)));
+            telemetry.update();
 
             telemetry.update();
 

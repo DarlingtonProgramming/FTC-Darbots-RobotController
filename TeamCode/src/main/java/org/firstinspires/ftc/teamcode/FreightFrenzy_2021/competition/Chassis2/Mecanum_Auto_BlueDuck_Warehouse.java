@@ -209,7 +209,7 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
             drive.followTrajectory(wallTraj);
 
             Trajectory plateTraj = drive.trajectoryBuilder(wallTraj.end())
-                    .back(27.875)
+                    .back(28)
                     .addDisplacementMarker(25, () -> {
                         DriveMethod.slideUp(Intake, Rotate, Slide, TARGET_HEIGHT);
                     })
@@ -224,14 +224,14 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
 
             //BACK TO WAREHOUSE & PARK
             Trajectory parkTraj1 = drive.trajectoryBuilder(plateTraj.end())
-                    .strafeRight(30)
+                    .strafeRight(29)
                     .addTemporalMarker(1, () -> {
                         DriveMethod.slideDown(Slide, Rotate, initialHeight);
                     })
                     .build();
             drive.followTrajectory(parkTraj1);
             Trajectory parkTraj2 = drive.trajectoryBuilder(parkTraj1.end())
-                    .strafeLeft(5)
+                    .strafeLeft(6)
                     .build();
             drive.followTrajectory(parkTraj2);
             Trajectory parkTraj3 = drive.trajectoryBuilder(parkTraj2.end())

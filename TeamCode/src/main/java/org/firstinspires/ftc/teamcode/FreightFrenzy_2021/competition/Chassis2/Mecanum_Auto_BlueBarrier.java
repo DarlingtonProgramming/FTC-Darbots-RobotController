@@ -262,12 +262,12 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
             drive.followTrajectory(wallTraj2);
 
             //Collect another block
-            Intake.setPower(1);
+            Intake.setPower(0.8);
             sleep(600);
             Intake.setPower(0);
             Rotate.setPosition(1);
             Intake.setPower(-0.8);
-            sleep(500);
+            sleep(800);
             Intake.setPower(0);
             Rotate.setPosition(0.7);
             Trajectory collTraj1 = drive.trajectoryBuilder(wallTraj2.end())
@@ -280,9 +280,6 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
                     .build();
             drive.followTrajectory(collTraj2);
 
-            Intake.setPower(0.8);
-            sleep(300);
-            Intake.setPower(0);
             Slide.setTargetPosition(initialHeight + 1150);
             Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             Slide.setPower(0.8);

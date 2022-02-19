@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.toRadians;
+import static org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage.autoState;
 
 @Autonomous(name = "BLUE BARRIER 2", group = "A Competition")
 public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
@@ -37,6 +39,8 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
     private CRServo Spin = null;
     private DcMotor Slide = null;
     private Servo Rotate = null;
+
+    private DistanceSensor RangeSensor = null;
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -60,7 +64,7 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
 
     @Override
     public void runOpMode() {
-        PoseStorage.autoState = DriveMethod.poseState.BLUE;
+        autoState = DriveMethod.poseState.BLUE;
         LF = hardwareMap.get(DcMotor.class, "LF");
         RF = hardwareMap.get(DcMotor.class, "RF");
         LB = hardwareMap.get(DcMotor.class, "LB");
@@ -68,6 +72,8 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
         Slide = hardwareMap.get(DcMotor.class, "Slide");
         Intake = hardwareMap.get(DcMotor.class, "Intake");
         Spin = hardwareMap.get(CRServo.class, "Spin");
+
+        RangeSensor = hardwareMap.get(DistanceSensor.class, "Range");
 
         LF.setDirection(DcMotor.Direction.REVERSE);
         RF.setDirection(DcMotor.Direction.FORWARD);
@@ -226,14 +232,14 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
 
             //CLOSER TO PLATE
             Trajectory closerTraj = drive.trajectoryBuilder(plateTraj3.end())
-                    .back(1.5)
+                    .back(2.4)
                     .build();
             drive.followTrajectory(closerTraj);
             drive.setPoseEstimate(closerTraj.end());
 
             //DUMP AND SLIDE DOWN
             DriveMethod.dump(Rotate);
-            sleep(500);
+            sleep(200);
 
             //BACK TO WALL
             if(visionResult == "RIGHT"){
@@ -262,14 +268,11 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
             drive.followTrajectory(wallTraj2);
 
             //Collect another block
-            Intake.setPower(0.8);
-            sleep(600);
-            Intake.setPower(0);
-            Rotate.setPosition(1);
-            Intake.setPower(-0.8);
-            sleep(800);
-            Intake.setPower(0);
-            Rotate.setPosition(0.7);
+            DriveMethod.blockDetection(drive, Intake, Rotate, 4);
+            Pose2d estimate1 = DriveMethod.autoCalibrationPose(autoState, drive, RangeSensor);
+            if(estimate1 != null) {
+                drive.setPoseEstimate(estimate1);
+            }
             Trajectory collTraj1 = drive.trajectoryBuilder(wallTraj2.end())
                     .back(35)
                     .build();
@@ -277,6 +280,9 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
 
             Trajectory collTraj2 = drive.trajectoryBuilder(collTraj1.end())
                     .lineToLinearHeading(new Pose2d(-4.25, 40.88, toRadians(60)))
+                    .addTemporalMarker(0.5, () -> {
+                        Intake.setPower(0);
+                    })
                     .build();
             drive.followTrajectory(collTraj2);
 
@@ -300,21 +306,32 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
             drive.followTrajectory(collTraj3);
 
             Trajectory collTraj4 = drive.trajectoryBuilder(collTraj3.end())
-                    .forward(36)
+                    .forward(32) //36
                     .build();
             drive.followTrajectory(collTraj4);
-            sleep(300);
-
-            PoseStorage.currentPose = drive.getPoseEstimate();
+            sleep(100);
 
             //Collect the third block
-            Intake.setPower(1);
-            sleep(600);
-            Intake.setPower(0);
-            Rotate.setPosition(1);
-            Intake.setPower(-0.8);
-            sleep(500);
-            Intake.setPower(0);
+            if(runtime.seconds() < 17) {
+                DriveMethod.blockDetection(drive, Intake, Rotate, 3);
+                Pose2d estimate2 = DriveMethod.autoCalibrationPose(autoState, drive, RangeSensor);
+                if(estimate2 != null) {
+                    drive.setPoseEstimate(estimate2);
+                }
+                if(runtime.seconds() < 25) {
+                    Trajectory end1 = drive.trajectoryBuilder(drive.getPoseEstimate(), true)
+                            .forward(5)
+                            .build();
+                    Trajectory end2 = drive.trajectoryBuilder(drive.getPoseEstimate(), true)
+                            .splineToLinearHeading(FieldConstant.BLUE_BARRIER_ENDING_POSE, toRadians(90))
+                            .build();
+                    drive.followTrajectory(end1);
+                    drive.followTrajectory(end2);
+                }
+            }
+
+
+            PoseStorage.currentPose = drive.getPoseEstimate();
         }
 
     }

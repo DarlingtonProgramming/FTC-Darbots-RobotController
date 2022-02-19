@@ -4,21 +4,21 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive_Chassis2;
 
+import java.util.ArrayList;
+
+import static java.lang.Math.toRadians;
 import static java.lang.Thread.sleep;
 
 public class DriveMethod {
@@ -167,14 +167,14 @@ public class DriveMethod {
     }
 
 
-    void twoPhaseSpin(boolean isReversed,double startingSpeed, double endSpeed) {
+    void twoPhaseSpin(boolean isReversed, double startingSpeed, double endSpeed) {
         double reverseFactor = 1;
         if(isReversed){
             reverseFactor = -1;
         }
         ElapsedTime tSpin = new ElapsedTime();
         double spinPower = startingSpeed * reverseFactor;
-        while (tSpin.milliseconds() < 1000){
+        while (tSpin.milliseconds() < 1000 ){
             Spin.setPower(spinPower);
         }
         while (tSpin.milliseconds() < 2500){
@@ -595,9 +595,118 @@ public class DriveMethod {
         Rotate.setPosition(0.85);
     }
 
-//    public static Pose2d autoCalibrationPose (double measuredDistance, double xFromCenter, double yFromCenter, double angle){
+    public static Pose2d autoCalibrationPose (DriveMethod.poseState autoState, SampleMecanumDrive_Chassis2 drive, DistanceSensor RangeSensor){
+//        double measured = RangeSensor.getDistance(DistanceUnit.INCH);
+//        double alpha = drive.getExternalHeading();
+//        double a = 2.75;
+//        double b = 7.5;
+//        double beta = 34.7778; //deg
 //        double l = 70.875;
-//        double a =
-//    }
+//        double p = 10.9573;
+//
+//        double y = l - p * Math.cos(Math.toRadians(alpha - beta));
+//        double x = l - measured * Math.sin(Math.toRadians(alpha)) + Math.sqrt(a * a + b * b) * Math.cos(Math.toRadians(90 - alpha - Math.atan(a / b)));
+//        return new Pose2d(x, y ,alpha);
+        ElapsedTime timer = new ElapsedTime();
+        timer.reset();
+        ArrayList<Double> measuredArray = new ArrayList<Double>();
+        while(timer.milliseconds() <= 100) {
+            double measuredDis = RangeSensor.getDistance(DistanceUnit.INCH);
+            if(measuredDis < 50 && measuredDis > 0){
+                measuredArray.add(measuredDis);
+            }
+        }
+        double sum = 0;
+        for (double dis : measuredArray) {
+            sum += dis;
+        }
+        double avgDis =  sum / measuredArray.size();
+        if(avgDis > 0) {
+            if (autoState == DriveMethod.poseState.BLUE) {
+                return new Pose2d(70.875 - avgDis - 4, 64.75, drive.getExternalHeading());
+            } else {
+                return new Pose2d(70.875 - avgDis - 4, -64.75, drive.getExternalHeading());
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public static Pose2d teleCalibrationPose (DriveMethod.poseState autoState, SampleMecanumDrive_Chassis2 drive, DistanceSensor RangeSensor){
+        ElapsedTime timer = new ElapsedTime();
+        timer.reset();
+        ArrayList<Double> measuredArray = new ArrayList<Double>();
+        while(timer.milliseconds() <= 100) {
+            double measuredDis = RangeSensor.getDistance(DistanceUnit.INCH);
+            if(measuredDis < 50 && measuredDis > 0){
+                measuredArray.add(measuredDis);
+            }
+        }
+        double sum = 0;
+        for (double dis : measuredArray) {
+            sum += dis;
+        }
+        double avgDis =  sum / measuredArray.size();
+        if(avgDis > 0) {
+            if (autoState == DriveMethod.poseState.BLUE) {
+                return new Pose2d(64.75, 70.875 - avgDis - 4, toRadians(90));//4
+            } else {
+                return new Pose2d(64.75, -70.875 + avgDis + 4, toRadians(-90));
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public static boolean blockDetection(SampleMecanumDrive_Chassis2 drive, DcMotor Intake, Servo Rotate, double timeout){
+        boolean holdBlock = false;
+        double currentIntake = Intake.getCurrentPosition();
+        ElapsedTime runtime = new ElapsedTime();
+        ElapsedTime blockTime = new ElapsedTime();
+        runtime.reset();
+        blockTime.reset();
+        Intake.setPower(1);
+        while(runtime.seconds() < timeout) {
+            double intakeSpeed = (Intake.getCurrentPosition() - currentIntake) / (runtime.seconds());
+            if (Intake.getPower() > 0 && intakeSpeed < 100) {
+                blockTime.reset();
+            }
+            if (Intake.getPower() == 0 && intakeSpeed > 100) {
+                blockTime.reset();
+            }
+            if (Intake.getPower() < 0) {
+                blockTime.reset();
+            }
+            if (intakeSpeed < 550 && blockTime.milliseconds() > 700 && Intake.getPower() != 0) {
+                if (!holdBlock) {
+                    drive.updatePoseEstimate();
+                    try {
+                        sleep(900);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Intake.setPower(0);
+                    try {
+                        sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    Intake.setPower(-1);
+                    Rotate.setPosition(0.6);
+                    return true;
+                }
+                holdBlock = true;
+            } else if (holdBlock) {
+                holdBlock = false;
+                blockTime.reset();
+            }
+            drive.setMotorPowers(0.10,0.10,0.10,0.10);
+        }
+        Rotate.setPosition(0.6);
+        drive.setMotorPowers(0,0,0,0);
+        drive.updatePoseEstimate();
+        //Intake.setPower(0);
+        return false;
+    }
 
 }

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.Chassis1;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive_Chassis1;
 
 @TeleOp(name = "TELEOP FINAL", group = "Competition")
+@Disabled
 public class Mecanum_TeleOp_Final extends LinearOpMode {
 
     private DcMotor LF = null;

@@ -112,13 +112,14 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
             tfod.setZoom(1, 16.0 / 9.0);
         }
 
-        //Traj
+        //All Trajectories
         SampleMecanumDrive_Chassis2 drive = new SampleMecanumDrive_Chassis2(hardwareMap);
         Pose2d startPose = FieldConstant.BLUE_DUCK_STARTING_POSE;
         drive.setPoseEstimate(startPose);
         Trajectory duckTraj = drive.trajectoryBuilder(startPose,true)
                 .splineToLinearHeading(new Pose2d(-56.91, 56.91, toRadians(135)), toRadians(0))
                 .build();
+
 
         telemetry.addData(">", "Press Play to start op mode");
         telemetry.update();
@@ -198,8 +199,7 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
             sleep(300);
 
             DriveMethod.spinDuck(drive, Spin, PoseStorage.autoState);
-
-            Pose2d wall = new Pose2d(-56.91, 56.91, drive.getExternalHeading()); //Math.toRadians(90
+            Pose2d wall = new Pose2d(-56.91, 56.91, drive.getExternalHeading()); //Math.toRadians(90)
             drive.setPoseEstimate(wall);
 
             //MOTION TO PLATE
@@ -207,7 +207,6 @@ public class Mecanum_Auto_BlueDuck_Warehouse extends LinearOpMode {
                     .splineToLinearHeading(new Pose2d(-59, 23.75, toRadians(180)), toRadians(-90))
                     .build();
             drive.followTrajectory(wallTraj);
-
             Trajectory plateTraj = drive.trajectoryBuilder(wallTraj.end())
                     .back(28)
                     .addDisplacementMarker(25, () -> {

@@ -116,10 +116,16 @@ public class Mecanum_Auto_RedDuck_Storage extends LinearOpMode {
         String visionResult = null;
 
 
-        //Traj
+        //All Trajectories
         SampleMecanumDrive_Chassis2 drive = new SampleMecanumDrive_Chassis2(hardwareMap);
         Pose2d startPose = new Pose2d(-41, -61.5, toRadians(-90));
         drive.setPoseEstimate(startPose);
+
+        Trajectory duckTraj = drive.trajectoryBuilder(startPose,true)
+                .splineToLinearHeading(new Pose2d(-56.91, -56.91, toRadians(225)), toRadians(0))
+                .build();
+
+
         telemetry.addData(">", "Press Play to start op mode");
         telemetry.update();
 
@@ -194,17 +200,13 @@ public class Mecanum_Auto_RedDuck_Storage extends LinearOpMode {
             telemetry.update();
 
             //MOTION TO DUCK
-            Trajectory duckTraj = drive.trajectoryBuilder(startPose,true)
-                    .splineToLinearHeading(new Pose2d(-56.91, -56.91, toRadians(225)), toRadians(0))
-                    .build();
+
             drive.followTrajectory(duckTraj);
-            sleep(500);
+            sleep(100);
 
             DriveMethod.spinDuck(drive, Spin, PoseStorage.autoState);
-
             Pose2d wall = new Pose2d(-56.91, -56.91, drive.getExternalHeading());// Math.toRadians(-180)
             drive.setPoseEstimate(wall);
-
             //MOTION TO PLATE
             Trajectory plateTraj1 = drive.trajectoryBuilder(wall, true)
                     .splineToLinearHeading(new Pose2d(-59, -26, toRadians(180)), toRadians(90))

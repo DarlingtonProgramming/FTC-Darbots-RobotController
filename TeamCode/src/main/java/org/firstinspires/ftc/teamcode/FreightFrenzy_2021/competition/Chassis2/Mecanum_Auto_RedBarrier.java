@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -25,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static java.lang.Math.toRadians;
+import static org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage.autoState;
 
 @Autonomous(name = "RED BARRIER 2", group = "A Competition")
 public class Mecanum_Auto_RedBarrier extends LinearOpMode {
@@ -37,8 +39,9 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
     private CRServo Spin = null;
     private DcMotor Slide = null;
     private Servo Rotate = null;
-    private ArrayList<Double[]> speedList = new ArrayList<Double[]>();
     private ElapsedTime runtime = new ElapsedTime();
+
+    private DistanceSensor RangeSensor = null;
 
     BNO055IMU imu;
     //Vuforia setup for vision
@@ -69,6 +72,8 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
         Slide = hardwareMap.get(DcMotor.class, "Slide");
         Intake = hardwareMap.get(DcMotor.class, "Intake");
         Spin = hardwareMap.get(CRServo.class, "Spin");
+
+        RangeSensor = hardwareMap.get(DistanceSensor.class, "Range");
 
         LF.setDirection(DcMotor.Direction.REVERSE);
         RF.setDirection(DcMotor.Direction.FORWARD);
@@ -225,7 +230,7 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
 
             //CLOSER TO PLATE
             Trajectory closerTraj = drive.trajectoryBuilder(plateTraj3.end())
-                    .back(1.5)
+                    .back(2.4)
                     .build();
             drive.followTrajectory(closerTraj);
             drive.setPoseEstimate(closerTraj.end());
@@ -261,53 +266,68 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
                     .build();
             drive.followTrajectory(wallTraj2);
 
-//            //Collect another block
-//            Intake.setPower(0.8);
-//            sleep(600);
-//            Intake.setPower(0);
-//            Rotate.setPosition(1);
-//            Intake.setPower(-0.8);
-//            sleep(500);
-//            Intake.setPower(0);
-//            Rotate.setPosition(0.95);
-//            Trajectory collTraj1 = drive.trajectoryBuilder(wallTraj2.end())
-//                    .back(35)
-//                    .build();
-//            drive.followTrajectory(collTraj1);
-//
-//            Trajectory collTraj2 = drive.trajectoryBuilder(collTraj1.end())
-//                    .lineToLinearHeading(new Pose2d(-4.25, -40.88, toRadians(-65.99)))
-//                    .build();
-//            drive.followTrajectory(collTraj2);
-//
-//            Intake.setPower(0.8);
-//            sleep(300);
-//            Intake.setPower(0);
-//            Slide.setTargetPosition(initialHeight + 1150);
-//            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            Slide.setPower(0.8);
-//            sleep(600);
-//            Rotate.setPosition(0.25);
-//            sleep(800);
-//            Rotate.setPosition(0.90);
-//            sleep(500);
-//            Slide.setTargetPosition(initialHeight);
-//            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//            Slide.setPower(0.8);
-//            sleep(500);
-//            Rotate.setPosition(0.95);
-//
-//            Trajectory collTraj3 = drive.trajectoryBuilder(collTraj2.end())
-//                    .lineToLinearHeading(new Pose2d(6.5, -65, toRadians(0)))
-//                    .build();
-//            drive.followTrajectory(collTraj3);
-//
-//            Trajectory collTraj4 = drive.trajectoryBuilder(collTraj3.end())
-//                    .forward(36)
-//                    .build();
-//            drive.followTrajectory(collTraj4);
-//            sleep(300);
-//
+            //Collect another block
+            DriveMethod.blockDetection(drive, Intake, Rotate, 5);
+            Pose2d estimate1 = DriveMethod.autoCalibrationPose(autoState, drive, RangeSensor);
+            if(estimate1 != null) {
+                drive.setPoseEstimate(estimate1);
+            }
+            Trajectory collTraj1 = drive.trajectoryBuilder(wallTraj2.end())
+                    .back(35)
+                    .build();
+            drive.followTrajectory(collTraj1);
+
+            Trajectory collTraj2 = drive.trajectoryBuilder(collTraj1.end())
+                    .lineToLinearHeading(new Pose2d(-4.25, -40.88, toRadians(-65.99)))
+                    .addTemporalMarker(0.5, () -> {
+                        Intake.setPower(0);
+                    })
+                    .build();
+            drive.followTrajectory(collTraj2);
+
+            Slide.setTargetPosition(initialHeight + 1150);
+            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            Slide.setPower(0.8);
+            sleep(600);
+            Rotate.setPosition(0.25);
+            sleep(800);
+            Rotate.setPosition(0.90);
+            sleep(500);
+            Slide.setTargetPosition(initialHeight);
+            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            Slide.setPower(0.8);
+            sleep(500);
+            Rotate.setPosition(0.95);
+
+            Trajectory collTraj3 = drive.trajectoryBuilder(collTraj2.end())
+                    .lineToLinearHeading(new Pose2d(6.5, -67.5, toRadians(0)))
+                    .build();
+            drive.followTrajectory(collTraj3);
+
+            Trajectory collTraj4 = drive.trajectoryBuilder(collTraj3.end())
+                    .forward(32) //36
+                    .build();
+            drive.followTrajectory(collTraj4);
+            sleep(300);
+
+            //Collect the third block
+            if(runtime.seconds() < 17) {
+                DriveMethod.blockDetection(drive, Intake, Rotate, 3);
+                Pose2d estimate2 = DriveMethod.autoCalibrationPose(autoState, drive, RangeSensor);
+                if (estimate2 != null) {
+                    drive.setPoseEstimate(estimate2);
+                }
+                if(runtime.seconds() < 25) {
+                    Trajectory end1 = drive.trajectoryBuilder(drive.getPoseEstimate(), true)
+                            .forward(5)
+                            .build();
+                    Trajectory end2 = drive.trajectoryBuilder(drive.getPoseEstimate(), true)
+                            .splineToLinearHeading(FieldConstant.RED_BARRIER_ENDING_POSE, toRadians(-90))
+                            .build();
+                    drive.followTrajectory(end1);
+                    drive.followTrajectory(end2);
+                }
+            }
 
             PoseStorage.currentPose = drive.getPoseEstimate();
         }

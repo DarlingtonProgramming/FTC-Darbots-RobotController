@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -25,6 +26,7 @@ import java.util.List;
 import static java.lang.Math.toRadians;
 
 @Autonomous(name = "RED DUCK - STORAGE", group = "Competition")
+@Disabled
 public class Mecanum_Auto_RedDuck_Storage extends LinearOpMode {
 
     private DcMotor LF = null;

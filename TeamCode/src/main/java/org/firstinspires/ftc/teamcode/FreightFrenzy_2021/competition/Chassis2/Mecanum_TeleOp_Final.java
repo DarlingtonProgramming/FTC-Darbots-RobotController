@@ -19,6 +19,9 @@ import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.FieldConsta
 import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive_Chassis2;
 
+import static java.lang.Math.toRadians;
+import static org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage.autoState;
+
 @TeleOp(name = "TELEOP FINAL 2", group = "A Competition")
 public class Mecanum_TeleOp_Final extends LinearOpMode {
 
@@ -37,9 +40,9 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private ElapsedTime blockTime = new ElapsedTime();
 
-    double rotate = 0;
+    Pose2d lastPos = null;
+
     double speed = 0.6;
-    boolean reverse = false;
 
     @Override
     public void runOpMode() {
@@ -86,8 +89,12 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
 
         //Read Position From Auto
         SampleMecanumDrive_Chassis2 chassis = new SampleMecanumDrive_Chassis2(hardwareMap);
-        chassis.setPoseEstimate(new Pose2d(0, 0, chassis.getExternalHeading()));
-        //chassis.setPoseEstimate(PoseStorage.currentPose);
+        if(PoseStorage.autoState != DriveMethod.poseState.UNKNOWN) {
+            chassis.setPoseEstimate(PoseStorage.currentPose);
+        }
+        else{
+            chassis.setPoseEstimate(new Pose2d(0, 0, chassis.getExternalHeading()));
+        }
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -120,8 +127,6 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
         boolean releasedBX1 = true;
         boolean releasedBB1 = true;
 
-        boolean holdBlock = false;
-
         boolean releasedBack2 =true;
         boolean releasedStart2 =true;
         double rotateSpeed = 1;
@@ -131,12 +136,22 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
         boolean toggleLB2 = true;
         boolean toggleLT2 = true;
 
-        double block = 0;
+        Trajectory sharedTraj2 = null;
+        if(PoseStorage.autoState == DriveMethod.poseState.UNKNOWN){
+            PoseStorage.autoState = DriveMethod.poseState.BLUE;
+        }
+        if(PoseStorage.autoState == DriveMethod.poseState.BLUE){
+            sharedTraj2 = chassis.trajectoryBuilder(new Pose2d(61.5, 18.5), true)
+                    .lineToLinearHeading(FieldConstant.SHARED_BLUE_END_POSE)
+                    .build();
+        } else{
+            sharedTraj2 = chassis.trajectoryBuilder(new Pose2d(61.5, -18.5), true)
+                    .lineToLinearHeading(FieldConstant.SHARED_RED_END_POSE)
+                    .build();
+        }
 
         while (opModeIsActive()) {
             runtime.reset();
-
-            double currentIntake = Intake.getCurrentPosition();
             chassis.update();
 
             // Retrieve your pose
@@ -186,7 +201,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             }
             if (gamepad1.left_bumper) {
                 if (releasedLB1 && Slide.getCurrentPosition() < initialHeight + 30){
-                    intakePower = 0.8;
+                    intakePower = 1;
                     telemetry.addLine("INTAKE STARTS");
                     blockTime.reset();
                     releasedLB1 = false;
@@ -197,8 +212,8 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                 releasedLB1 = true;
             }
             if (gamepad1.right_bumper) {
-                if (releasedRB1 && Slide.getCurrentPosition() < initialHeight + 30){
-                    intakePower = -0.8;
+                if (releasedRB1){
+                    intakePower = -1;
                     telemetry.addLine("INTAKE REVERSE STARTS");
                     releasedRB1 = false;
                 }
@@ -228,21 +243,40 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
 
 
             if (gamepad1.x) {
-                if (releasedX1){
-                    if (toggleX1) {
-                        LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                        LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                        RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                        RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-                        telemetry.addLine("BREAK");
-                        toggleX1 = false;
-                    } else {
-                        LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                        LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                        RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                        RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                        telemetry.addLine("FLOAT");
-                        toggleX1 = true;
+                if (releasedX1 && lastPos != null){
+//                    if (toggleX1) {
+//                        LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//                        LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//                        RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//                        RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+//                        telemetry.addLine("BREAK");
+//                        toggleX1 = false;
+//                    } else {
+//                        LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//                        LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//                        RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//                        RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+//                        telemetry.addLine("FLOAT");
+//                        toggleX1 = true;
+//                    }
+                    if (PoseStorage.autoState == DriveMethod.poseState.BLUE) {
+                        Trajectory sharedTraj3 = chassis.trajectoryBuilder(chassis.getPoseEstimate(), false)
+                                .lineToLinearHeading(new Pose2d(61.5, 18.5, toRadians(90)))
+                                .build();
+                        chassis.followTrajectory(sharedTraj3);
+                        Trajectory sharedTraj4 = chassis.trajectoryBuilder(chassis.getPoseEstimate(), false)
+                                .lineToLinearHeading(lastPos)
+                                .build();
+                        chassis.followTrajectory(sharedTraj4);
+                    } else if (PoseStorage.autoState == DriveMethod.poseState.RED) {
+                        Trajectory sharedTraj3 = chassis.trajectoryBuilder(chassis.getPoseEstimate(), false)
+                                .lineToLinearHeading(new Pose2d(61.5, -18.5,toRadians(-90)))
+                                .build();
+                        chassis.followTrajectory(sharedTraj3);
+                        Trajectory sharedTraj4 = chassis.trajectoryBuilder(chassis.getPoseEstimate(), false)
+                                .lineToLinearHeading(lastPos)
+                                .build();
+                        chassis.followTrajectory(sharedTraj4);
                     }
                     releasedX1 = false;
                 }
@@ -253,25 +287,34 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             //SHARED HUB
             if(gamepad1.y) {
                 if (releasedY1) {
-                    if (PoseStorage.autoState == DriveMethod.poseState.BLUE) {
+                    lastPos = DriveMethod.teleCalibrationPose(PoseStorage.autoState, chassis, RangeSensor);
+                    if(lastPos != null) {
+                        chassis.setPoseEstimate(lastPos);
+                        telemetry.addLine("Detected");
+                    } else if(PoseStorage.autoState == DriveMethod.poseState.BLUE){
                         chassis.setPoseEstimate(FieldConstant.SHARED_BLUE_ENTER_POSE);
+                        telemetry.addLine("NOT Detected - Blue");
+                    }
+                    else {
+                        chassis.setPoseEstimate(FieldConstant.SHARED_RED_ENTER_POSE);
+                        telemetry.addLine("NOT Detected - Red");
+                    }
+                    chassis.updatePoseEstimate();
+                    if (PoseStorage.autoState == DriveMethod.poseState.BLUE) {
                         Trajectory sharedTraj1 = chassis.trajectoryBuilder(chassis.getPoseEstimate(), true)
-                                .lineTo(new Vector2d(64.75, 18))
+                                .lineTo(new Vector2d(61.5, 18.5))
+                                //.lineToLinearHeading(FieldConstant.SHARED_BLUE_END_POSE)
+//                                .addDisplacementMarker(() -> chassis.followTrajectoryAsync(finalSharedTraj))
                                 .build();
                         chassis.followTrajectory(sharedTraj1);
-                        Trajectory sharedTraj2 = chassis.trajectoryBuilder(sharedTraj1.end(), true)
-                                .lineToLinearHeading(FieldConstant.SHARED_BLUE_END_POSE)
-                                .build();
                         chassis.followTrajectory(sharedTraj2);
                     } else if (PoseStorage.autoState == DriveMethod.poseState.RED) {
-                        chassis.setPoseEstimate(FieldConstant.SHARED_RED_ENTER_POSE);
                         Trajectory sharedTraj1 = chassis.trajectoryBuilder(chassis.getPoseEstimate(), true)
-                                .lineTo(new Vector2d(64.75, -18))
+                                .lineTo(new Vector2d(61.5, -18.5))//64.75
+                                //.lineToLinearHeading(FieldConstant.SHARED_RED_END_POSE)
+//                                .addDisplacementMarker(() -> chassis.followTrajectoryAsync(finalSharedTraj1))
                                 .build();
                         chassis.followTrajectory(sharedTraj1);
-                        Trajectory sharedTraj2 = chassis.trajectoryBuilder(sharedTraj1.end(), true)
-                                .lineToLinearHeading(FieldConstant.SHARED_RED_END_POSE)
-                                .build();
                         chassis.followTrajectory(sharedTraj2);
                     } else {
                         gamepad1.rumble(300);
@@ -280,8 +323,9 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                     chassis.updatePoseEstimate();
                     PoseStorage.state = DriveMethod.poseToState(chassis.getPoseEstimate());
                     releasedY1 = false;
+
                 } else if (!releasedY1) {
-                    speed = 0.2;
+                    speed = 0.3;
                     releasedY1 = true;
                 }
             }
@@ -293,10 +337,12 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                     RF.setPower(0);
                     LB.setPower(0);
                     RB.setPower(0);
-                    rotateWithSpeed(Rotate,0.95, rotateSpeed);
+                    rotateWithSpeed(Rotate,0.90, rotateSpeed);
+                    sleep(500);
                     Slide.setTargetPosition(initialHeight);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    Slide.setPower(1);
+                    Slide.setPower(0.8);
+                    Rotate.setPosition(0.95);
                     releasedA2 = false;
                 }
 
@@ -309,6 +355,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                     RF.setPower(0);
                     LB.setPower(0);
                     RB.setPower(0);
+                    rotateWithSpeed(Rotate,0.85, rotateSpeed);
                     Slide.setTargetPosition(initialHeight + 500);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(1);
@@ -326,6 +373,7 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
                     RF.setPower(0);
                     LB.setPower(0);
                     RB.setPower(0);
+                    rotateWithSpeed(Rotate,0.85, rotateSpeed);
                     Slide.setTargetPosition(initialHeight + 1150);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(1);
@@ -339,6 +387,10 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
 
             if(gamepad2.x){
                 if(releasedX2) {
+                    LF.setPower(0);
+                    RF.setPower(0);
+                    LB.setPower(0);
+                    RB.setPower(0);
                     rotateWithSpeed(Rotate,0.90, rotateSpeed);
                     sleep(500);
                     Slide.setTargetPosition(initialHeight);
@@ -497,45 +549,8 @@ public class Mecanum_TeleOp_Final extends LinearOpMode {
             telemetry.addData("Back Motors", "LB (%.2f), RB (%.2f)", LBPower, RBPower);
             telemetry.addData("Controller", "X (%.2f), Y (%.2f)", strafe, drive);
             telemetry.addData("Speed:", speed);
-            telemetry.addLine();
-            telemetry.addData("LF: ", LF.getCurrentPosition());
-            telemetry.addData("RF: ", RF.getCurrentPosition());
-            telemetry.addData("LB: ", LB.getCurrentPosition());
-            telemetry.addData("RB: ", RB.getCurrentPosition());
-            telemetry.addLine();
-            double intakeSpeed = (Intake.getCurrentPosition()-currentIntake)/(runtime.seconds());
-
-            telemetry.addData("INTAKE ENCODER VALUE: ", Intake.getCurrentPosition());
-            telemetry.addData("INTAKE DIFFERENCE: ", Intake.getCurrentPosition()-currentIntake);
-            telemetry.addData("INTAKE SPEED VALUE: ", intakeSpeed);
-            if(Intake.getPower() > 0 && intakeSpeed < 300){
-                blockTime.reset();
-            }
-            if(Intake.getPower() == 0 && intakeSpeed > 100){
-                blockTime.reset();
-            }
-            if(Intake.getPower() < 0){
-                blockTime.reset();
-            }
-            if(intakeSpeed < 300 && blockTime.milliseconds() > 400 && Intake.getPower() != 0){
-                if(!holdBlock) {
-                    block++;
-                }
-                holdBlock = true;
-            }
-            else if(holdBlock){
-                holdBlock = false;
-                blockTime.reset();
-            }
-            telemetry.addData("BLOCK VALUE: ", block);
-
-            telemetry.addData("range", String.format("%.01f mm", RangeSensor.getDistance(DistanceUnit.MM)));
-            telemetry.addData("range", String.format("%.01f cm", RangeSensor.getDistance(DistanceUnit.CM)));
-            telemetry.addData("range", String.format("%.01f in", RangeSensor.getDistance(DistanceUnit.INCH)));
-            telemetry.update();
 
             telemetry.update();
-
         }
     }
 

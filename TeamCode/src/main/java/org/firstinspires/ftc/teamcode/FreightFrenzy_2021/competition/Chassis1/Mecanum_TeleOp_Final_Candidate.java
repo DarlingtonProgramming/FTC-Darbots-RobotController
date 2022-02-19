@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.Chassis1;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -13,6 +14,7 @@ import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive_Chassi
 import java.util.ArrayList;
 
 @TeleOp(name = "Mecanum TeleOp Candidate", group = "Linear OpMode")
+@Disabled
 public class Mecanum_TeleOp_Final_Candidate extends LinearOpMode {
 
     private DcMotor LF = null;

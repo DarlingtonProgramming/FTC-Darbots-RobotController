@@ -5,6 +5,7 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -25,6 +26,7 @@ import java.util.List;
 import static java.lang.Math.toRadians;
 
 @Autonomous(name = "RED DUCK - WAREHOUSE", group = "Competition")
+@Disabled
 public class Mecanum_Auto_RedDuck_Warehouse extends LinearOpMode {
 
     private DcMotor LF = null;
@@ -244,7 +246,7 @@ public class Mecanum_Auto_RedDuck_Warehouse extends LinearOpMode {
                     .build();
             drive.followTrajectory(parkTraj3);
             Trajectory parkTraj4 = drive.trajectoryBuilder(parkTraj3.end())
-                    .forward(75)
+                    .forward(76)
                     .build();
             drive.followTrajectory(parkTraj4);
             sleep(500);

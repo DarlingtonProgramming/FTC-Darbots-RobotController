@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name = "team1", group = "group project")
@@ -11,6 +12,8 @@ public class PainterRobot extends LinearOpMode {
 
     private DcMotor leftDrive = null;
     private DcMotor rightDrive = null;
+    private Servo leftServo =null;
+    private Servo rightServo = null;
 
     static final double     COUNTS_PER_MOTOR_REV    = 1120 ;    // eg: TETRIX Motor Encoder
     static final double     DRIVE_GEAR_REDUCTION    = 1.0 ;     // This is < 1.0 if geared UP
@@ -37,6 +40,8 @@ public class PainterRobot extends LinearOpMode {
         // step (using the FTC Robot Controller app on the phone).
         leftDrive = hardwareMap.get(DcMotor.class, "left_drive");
         rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+        leftServo = hardwareMap.get(Servo.class, "servo1");
+        rightServo = hardwareMap.get(Servo.class, "servo2");
 
         // Most robots need the motor on one side to be reversed to drive forward
         // Reverse the motor that runs backwards when connected directly to the battery
@@ -67,9 +72,17 @@ public class PainterRobot extends LinearOpMode {
 
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
-        encoderDrive(DRIVE_SPEED, 10, 10, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED, 10, -10, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
+        leftServo.setPosition(0);
+        rightServo.setPosition(0);
+
+        encoderDrive(DRIVE_SPEED, 47, 10, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        leftServo.setPosition(0.5);
+        rightServo.setPosition(0.5);
+        encoderDrive(TURN_SPEED, 12, -10, 4.0);  // S2: Turn Right 12 Inches with 4 Sec timeout
         encoderDrive(DRIVE_SPEED, -12, -12, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
+
+
+
 
         telemetry.addData("Path", "Complete");
         telemetry.update();

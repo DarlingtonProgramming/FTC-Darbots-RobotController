@@ -73,13 +73,30 @@ public class PainterRobot extends LinearOpMode {
         // Step through each leg of the path,
         // Note: Reverse movement is obtained by setting a negative distance (not speed)
 
-        //leftServo.setPosition(0.1);
-        rightServo.setPosition(0.1);
 
-        encoderDrive(DRIVE_SPEED, 47, 10, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
-        encoderDrive(TURN_SPEED, 50, -50, 15.0);  // S2: Turn Right 12 Inches with 5 Sec timeout
+        leftServo.setPosition(0.5);
+        rightServo.setPosition(0.5);
+        sleep(1000);
+
+
+        leftServo.setPosition(0.1);
+        rightServo.setPosition(0.9);
+        sleep(500);
+
+        encoderDrive(DRIVE_SPEED, 2, 2, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        encoderDrive(DRIVE_SPEED, -2, -2, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
+        leftServo.setPosition(0.5);
+        rightServo.setPosition(0.5);
+        sleep(500);
+        encoderDrive(DRIVE_SPEED, 10, 10, 5.0);  // S1: Forward 47 Inches with 5 Sec timeout
+
+
+        leftServo.setPosition(0.1);
+        rightServo.setPosition(0.9);
+        sleep(500);
+        encoderDrive(TURN_SPEED, 42, -42, 15.0);  // S2: Turn Right 12 Inches with 5 Sec timeout
         //encoderDrive(DRIVE_SPEED, -12, -12, 4.0);  // S3: Reverse 24 Inches with 4 Sec timeout
-       // leftServo.setPosition(0.5);
+        leftServo.setPosition(0.5);
         rightServo.setPosition(0.5);
         sleep(1000);
 

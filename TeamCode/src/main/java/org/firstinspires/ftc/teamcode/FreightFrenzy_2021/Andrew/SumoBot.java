@@ -47,7 +47,7 @@ public class SumoBot extends LinearOpMode {
         boolean releasedDD1 = true;
         boolean releasedDU1 = true;
         boolean releasedX = true;
-
+        boolean switchMode = true;
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -72,21 +72,25 @@ public class SumoBot extends LinearOpMode {
             }
 
 
-//            if (gamepad1.x) {
-//                if (releasedX) {
-//                    leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//                    rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-//                    telemetry.addLine("BREAK");
-//                    releasedX = false;
-//                } else if (!releasedX) {
-//                    leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-//                    rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-//                    telemetry.addLine("FLOAT");
-//                    releasedX = true;
-//                }
-//            } else if(!releasedX){
-//                releasedX=true;
-//            }
+            if (gamepad1.x) {
+                if (releasedX) {
+                    if (switchMode){
+                        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+                        telemetry.addLine("BREAK");
+                        switchMode=false;
+                    } else if (!switchMode) {
+                        leftDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                        rightDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+                        telemetry.addLine("FLOAT");
+                        switchMode = true;
+                    }
+                    releasedX = false;
+                }
+
+            } else if(!releasedX){
+                releasedX=true;
+            }
 
 
                 // Setup a variable for each drive wheel to save power level for telemetry

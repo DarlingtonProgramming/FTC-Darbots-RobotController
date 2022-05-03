@@ -106,7 +106,7 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
         sleep(200);
         Slide.setPower(0.0);
         Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Rotate.setPosition(0.95);
+        Rotate.setPosition(0.7);
 
         //Vision
         initVuforia();
@@ -138,7 +138,7 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
         while (!opModeIsActive()){
             if (tfod != null) {
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                if (updatedRecognitions != null) {
+                if (updatedRecognitions != null && (center > 402 || center == -1)) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
                     int i = 0;
                     for (Recognition recognition : updatedRecognitions) {
@@ -156,6 +156,7 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
         waitForStart();
         recogDuration -= recogTime.milliseconds();
         if(opModeIsActive()) {
+
             runtime.reset();
             if(recogDuration > 1000){
                 recogDuration = 1500;
@@ -267,7 +268,7 @@ public class Mecanum_Auto_RedBarrier extends LinearOpMode {
             drive.followTrajectory(wallTraj2);
 
             //Collect another block
-            DriveMethod.blockDetection(drive, Intake, Rotate, 5);
+            DriveMethod.blockDetection(drive, Intake, Rotate, 4);
             Pose2d estimate1 = DriveMethod.autoCalibrationPose(autoState, drive, RangeSensor);
             if(estimate1 != null) {
                 drive.setPoseEstimate(estimate1);

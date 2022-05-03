@@ -95,7 +95,7 @@ public class Mecanum_Auto_BlueDuck_Storage extends LinearOpMode {
         sleep(100);
         Slide.setPower(0.0);
         Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        Rotate.setPosition(0.85);
+        Rotate.setPosition(0.7);
 
         //Vision
         initVuforia();
@@ -134,7 +134,7 @@ public class Mecanum_Auto_BlueDuck_Storage extends LinearOpMode {
         while (!opModeIsActive()){
             if (tfod != null) {
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                if (updatedRecognitions != null) {
+                if (updatedRecognitions != null  && (center < 273 || center == -1)) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
                     int i = 0;
                     for (Recognition recognition : updatedRecognitions) {
@@ -148,6 +148,8 @@ public class Mecanum_Auto_BlueDuck_Storage extends LinearOpMode {
                 }
             }
         }
+
+
 
         waitForStart();
         recogDuration -= recogTime.milliseconds();

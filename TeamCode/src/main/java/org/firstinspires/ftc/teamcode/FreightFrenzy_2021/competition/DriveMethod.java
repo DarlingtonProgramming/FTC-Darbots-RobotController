@@ -554,7 +554,7 @@ public class DriveMethod {
 //            e.printStackTrace();
 //        }
 //        Intake.setPower(0);
-        Rotate.setPosition(0.8);
+        Rotate.setPosition(0.7);
         Slide.setTargetPosition(targetHeight);
         Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         Slide.setPower(0.8);
@@ -677,7 +677,7 @@ public class DriveMethod {
             if (Intake.getPower() < 0) {
                 blockTime.reset();
             }
-            if (intakeSpeed < 550 && blockTime.milliseconds() > 700 && Intake.getPower() != 0) {
+            if (intakeSpeed < 600 && blockTime.milliseconds() > 700 && Intake.getPower() != 0) {
                 if (!holdBlock) {
                     drive.updatePoseEstimate();
                     try {

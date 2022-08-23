@@ -53,7 +53,7 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
             "Duck",
             "Marker"
     };
-    private static final String VUFORIA_KEY =
+     private static final String VUFORIA_KEY =
             Robot4100Common.VUFORIA_LICENSE;
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;

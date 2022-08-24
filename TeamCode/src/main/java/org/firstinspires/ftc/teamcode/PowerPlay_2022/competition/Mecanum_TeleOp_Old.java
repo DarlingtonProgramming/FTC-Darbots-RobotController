@@ -16,7 +16,7 @@ import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.FieldConsta
 import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive_Chassis1;
 
-@TeleOp(name = "TELEOP OLD FINAL", group = "Competition")
+@TeleOp(name = "FF - MAIN", group = "Competition")
 
 public class Mecanum_TeleOp_Old extends LinearOpMode{
 

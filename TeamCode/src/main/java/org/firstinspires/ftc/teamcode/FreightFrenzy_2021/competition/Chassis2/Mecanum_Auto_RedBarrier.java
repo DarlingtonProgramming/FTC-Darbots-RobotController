@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -29,6 +30,7 @@ import static java.lang.Math.toRadians;
 import static org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage.autoState;
 
 @Autonomous(name = "RED BARRIER 2", group = "A Competition")
+@Disabled
 public class Mecanum_Auto_RedBarrier extends LinearOpMode {
 
     private DcMotor LF = null;

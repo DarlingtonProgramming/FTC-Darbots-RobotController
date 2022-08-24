@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cRangeSensor;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -23,6 +24,7 @@ import static java.lang.Math.toRadians;
 import static org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage.autoState;
 
 @TeleOp(name = "TELEOP FINAL 2", group = "A Competition")
+@Disabled
 public class Mecanum_TeleOp_Final extends LinearOpMode {
 
     private DcMotor LF = null;

@@ -4,18 +4,17 @@
  * It is extraordinarily rare that you will ever need to edit this file.
  */
 
-configurations {
-    doc { transitive false }
-}
-
 buildscript {
     repositories {
         mavenCentral()
         google()
-        jcenter()
     }
     dependencies {
+<<<<<<< HEAD
         classpath 'com.android.tools.build:gradle:7.0.4'
+=======
+        classpath 'com.android.tools.build:gradle:7.2.0'
+>>>>>>> ftc/master
     }
 }
 
@@ -25,7 +24,6 @@ allprojects {
     repositories {
         mavenCentral()
         google()
-        jcenter()
     }
 }
 
@@ -37,6 +35,7 @@ repositories {
         dirs '../libs'
     }
 }
+<<<<<<< HEAD
 
 dependencies {
     doc 'org.firstinspires.ftc:Hardware:7.1.0'
@@ -68,3 +67,5 @@ task extractJavadoc {
     }
 }
 
+=======
+>>>>>>> ftc/master

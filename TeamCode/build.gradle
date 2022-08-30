@@ -16,13 +16,10 @@ apply from: '../build.common.gradle'
 apply from: '../build.dependencies.gradle'
 
 android {
-<<<<<<< HEAD
     androidResources {
         noCompress 'tflite'
     }
-=======
     namespace = 'org.firstinspires.ftc.teamcode'
->>>>>>> ftc/master
 }
 
 dependencies {

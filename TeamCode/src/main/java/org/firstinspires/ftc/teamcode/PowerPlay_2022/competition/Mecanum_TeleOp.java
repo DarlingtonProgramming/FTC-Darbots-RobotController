@@ -7,26 +7,36 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name = "Mecanum TeleOp", group = "1")
+public class Mecanum_TeleOp extends LinearOpMode {
 
-public class Mecanum_TeleOp extends LinearOpMode{
     private DcMotor LF = null;
     private DcMotor RF = null;
     private DcMotor LB = null;
     private DcMotor RB = null;
 
-    double speed = 1;
+    double speed = 0.5;
 
     @Override
     public void runOpMode() {
-        LF  = hardwareMap.get(DcMotor.class, "LF");
+        LF = hardwareMap.get(DcMotor.class, "LF");
         RF = hardwareMap.get(DcMotor.class, "RF");
-        LB  = hardwareMap.get(DcMotor.class, "LB");
+        LB = hardwareMap.get(DcMotor.class, "LB");
         RB = hardwareMap.get(DcMotor.class, "RB");
 
-        LF.setDirection(DcMotor.Direction.REVERSE);
-        RF.setDirection(DcMotor.Direction.FORWARD);
-        LB.setDirection(DcMotor.Direction.REVERSE);
-        RB.setDirection(DcMotor.Direction.FORWARD);
+        LF.setDirection(DcMotor.Direction.FORWARD);
+        RF.setDirection(DcMotor.Direction.REVERSE);
+        LB.setDirection(DcMotor.Direction.FORWARD);
+        RB.setDirection(DcMotor.Direction.REVERSE);
+
+        LF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         double LFPower;
         double RFPower;
@@ -47,7 +57,7 @@ public class Mecanum_TeleOp extends LinearOpMode{
             double strafe  = -gamepad1.left_stick_x;
             double rotate = gamepad1.right_stick_x;
 
-            if(gamepad1.dpad_up) {
+            if (gamepad1.dpad_up) {
                 if(releasedDU1) {
                     increaseSpeed(0.05);
                     releasedDU1 = false;
@@ -56,8 +66,8 @@ public class Mecanum_TeleOp extends LinearOpMode{
                 releasedDU1 = true;
             }
 
-            if(gamepad1.dpad_down){
-                if(releasedDD1) {
+            if (gamepad1.dpad_down){
+                if (releasedDD1) {
                     decreaseSpeed(0.05);
                     releasedDD1 = false;
                 }
@@ -65,10 +75,10 @@ public class Mecanum_TeleOp extends LinearOpMode{
                 releasedDD1 = true;
             }
 
-            LFPower  = Range.clip(gamepad1.left_trigger + speed*(drive + rotate - strafe), -1.0, 1.0) ;
-            LBPower  = Range.clip(gamepad1.left_trigger + speed*(drive + rotate + strafe), -1.0, 1.0) ;
-            RFPower  = Range.clip(gamepad1.right_trigger + speed*(drive - rotate + strafe), -1.0, 1.0) ;
-            RBPower  = Range.clip(gamepad1.right_trigger + speed*(drive - rotate - strafe), -1.0, 1.0) ;
+            LFPower = Range.clip(gamepad1.left_trigger + speed*(drive - rotate - strafe), -1.0, 1.0) ;
+            LBPower = Range.clip(gamepad1.left_trigger + speed*(drive - rotate + strafe), -1.0, 1.0) ;
+            RFPower = Range.clip(gamepad1.right_trigger + speed*(drive + rotate + strafe), -1.0, 1.0) ;
+            RBPower = Range.clip(gamepad1.right_trigger + speed*(drive + rotate - strafe), -1.0, 1.0) ;
 
             LF.setPower(LFPower);
             RF.setPower(RFPower);

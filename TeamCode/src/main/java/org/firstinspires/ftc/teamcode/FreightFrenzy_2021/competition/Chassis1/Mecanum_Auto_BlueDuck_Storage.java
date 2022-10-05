@@ -18,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.DriveMethod;
 import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.competition.PoseStorage;
-import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDrive_Chassis1;
+import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.roadrunner.drive.SampleMecanumDrive_Chassis1;
 import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
 
 import java.util.List;

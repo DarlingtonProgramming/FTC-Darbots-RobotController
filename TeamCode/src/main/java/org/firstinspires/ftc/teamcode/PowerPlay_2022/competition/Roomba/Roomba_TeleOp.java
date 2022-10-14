@@ -188,6 +188,26 @@ public class Roomba_TeleOp extends LinearOpMode {
                 releasedDD2 = true;
             }
 
+            if (gamepad2.dpad_left) {
+                if (releasedDL2) {
+                    Turn.setPower(Roomba_Constants.TURN_MIN);
+                    releasedDL2 = false;
+                }
+            } else if (!releasedDL2) {
+                Turn.setPower(0);
+                releasedDL2 = true;
+            }
+
+            if (gamepad2.dpad_right) {
+                if (releasedDR2) {
+                    Turn.setPower(Roomba_Constants.TURN_MAX);
+                    releasedDR2 = false;
+                }
+            } else if (!releasedDR2) {
+                Turn.setPower(0);
+                releasedDR2 = true;
+            }
+
             /*
             if (gamepad2.left_trigger > 0.9) { //&& Slide.getCurrentPosition() >= SLIDE_INITIAL + Roomba_Constants.SL_LOW
                 if (releasedLT2) {
@@ -223,11 +243,13 @@ public class Roomba_TeleOp extends LinearOpMode {
             LB.setPower(LBPower);
             RB.setPower(RBPower);
 
+            /*
             if (Slide.getCurrentPosition() > SLIDE_INITIAL + 600) {
                 Turn.setPower(Range.clip(gamepad2.right_stick_x, Roomba_Constants.TURN_MIN, Roomba_Constants.TURN_MAX));
             } else {
                 Turn.setPower(0);
             }
+            */
 
             telemetry.addData("Front Motors", "LF (%.2f), RF (%.2f)", LFPower, RFPower);
             telemetry.addData("Back Motors", "LB (%.2f), RB (%.2f)", LBPower, RBPower);

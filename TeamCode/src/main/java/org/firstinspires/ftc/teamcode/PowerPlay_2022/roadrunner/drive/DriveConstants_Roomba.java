@@ -87,8 +87,8 @@ public class DriveConstants_Roomba {
      * You are free to raise this on your own if you would like. It is best determined through experimentation.
      
      */
-    public static double MAX_VEL = 54.66855022514893;
-    public static double MAX_ACCEL = 54.66855022514893;
+    public static double MAX_VEL = 46.743540471846245;
+    public static double MAX_ACCEL = 46.743540471846245;
     public static double MAX_ANG_VEL = Math.toRadians(250.58217599999998);
     public static double MAX_ANG_ACCEL = Math.toRadians(250.58217599999998);
 

@@ -5,19 +5,18 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 public class PoseStorage {
     public enum poseState {
         RED,
-        RED_TOP,
-        RED_BOTTOM,
+        RED_LEFT,
+        RED_RIGHT,
+        RED_SUBSTATION,
+        RED_TERMINAL,
+        RED_OTHER,
         BLUE,
-        BLUE_TOP,
-        BLUE_BOTTOM,
+        BLUE_LEFT,
+        BLUE_RIGHT,
+        BLUE_SUBSTATION,
+        BLUE_TERMINAL,
+        BLUE_OTHER,
         UNKNOWN
-    }
-    public enum alliance {
-        RED,
-        BLUE
-    }
-    public enum chassis {
-        ROOMBA
     }
     public static Pose2d currentPose = new Pose2d();
     public static poseState state = PoseStorage.poseState.UNKNOWN;

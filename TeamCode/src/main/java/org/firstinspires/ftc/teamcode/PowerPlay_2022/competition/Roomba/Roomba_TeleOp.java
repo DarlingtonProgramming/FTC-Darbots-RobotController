@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -7,7 +8,11 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name = "Roomba TeleOp", group = "1")
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.FieldConstant;
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.PoseStorage;
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.MecanumDrive_Roomba;
+
+@TeleOp(name = "Roomba TeleOp", group = "Competition")
 public class Roomba_TeleOp extends LinearOpMode {
     private DcMotor LF, RF, LB, RB, Slide;
     private CRServo Turn;
@@ -38,7 +43,10 @@ public class Roomba_TeleOp extends LinearOpMode {
 
         // Use slide positions
         final int SLIDE_INITIAL = Slide.getCurrentPosition();
-        int slideStoppedPos = SLIDE_INITIAL;
+
+        MecanumDrive_Roomba Roomba = new MecanumDrive_Roomba(hardwareMap);
+        Pose2d startPose = FieldConstant.BLUE_LEFT;
+        Roomba.setPoseEstimate(startPose);
 
         // Set power variables
         double LFPower;
@@ -169,9 +177,6 @@ public class Roomba_TeleOp extends LinearOpMode {
                 }
             } else if (!releasedDU2){
                 Slide.setPower(0);
-                slideStoppedPos = Slide.getCurrentPosition();
-                //Slide.setTargetPosition(slideStoppedPos);
-                //Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 releasedDU2 = true;
             }
 
@@ -182,12 +187,10 @@ public class Roomba_TeleOp extends LinearOpMode {
                 }
             } else if (!releasedDD2) {
                 Slide.setPower(0);
-                slideStoppedPos = Slide.getCurrentPosition();
-                //Slide.setTargetPosition(slideStoppedPos);
-                //Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 releasedDD2 = true;
             }
 
+            /*
             if (gamepad2.dpad_left) {
                 if (releasedDL2) {
                     Turn.setPower(Roomba_Constants.TURN_MIN);
@@ -208,7 +211,6 @@ public class Roomba_TeleOp extends LinearOpMode {
                 releasedDR2 = true;
             }
 
-            /*
             if (gamepad2.left_trigger > 0.9) { //&& Slide.getCurrentPosition() >= SLIDE_INITIAL + Roomba_Constants.SL_LOW
                 if (releasedLT2) {
                     if (Turn.getPosition() > Roomba_Constants.TURN_MIDPOINT) Turn.setPosition(Roomba_Constants.TURN_MIN);
@@ -259,6 +261,10 @@ public class Roomba_TeleOp extends LinearOpMode {
             telemetry.addLine("Pinch: " + Pinch.getPosition());
             telemetry.addData("Controller", "X (%.2f), Y (%.2f)", strafe, drive);
             telemetry.addData("Speed:", speed);
+            Pose2d currentPose = Roomba.getPoseEstimate();
+            telemetry.addData("X:", currentPose.getX());
+            telemetry.addData("Y:", currentPose.getY());
+            telemetry.addData("Heading:", Roomba.getExternalHeading());
             telemetry.update();
         }
     }

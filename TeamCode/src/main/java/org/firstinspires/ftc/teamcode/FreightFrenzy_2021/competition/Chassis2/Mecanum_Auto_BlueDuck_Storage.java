@@ -69,7 +69,7 @@ public class Mecanum_Auto_BlueDuck_Storage extends LinearOpMode {
         LF.setDirection(DcMotor.Direction.REVERSE);
         RF.setDirection(DcMotor.Direction.FORWARD);
         LB.setDirection(DcMotor.Direction.REVERSE);
-        RB.setDirection(DcMotor.Direction.FORWARD);
+        RB.setDirection(DcMotor.Direction.REVERSE);
 
         LF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);

@@ -94,10 +94,8 @@ public class Mecanum_Auto_BlueBarrier extends LinearOpMode {
         Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         Spin.setDirection(DcMotor.Direction.FORWARD);
 
-
         Rotate = hardwareMap.get(Servo.class, "Rotate");
         Rotate.setDirection(Servo.Direction.FORWARD);
-
 
         LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

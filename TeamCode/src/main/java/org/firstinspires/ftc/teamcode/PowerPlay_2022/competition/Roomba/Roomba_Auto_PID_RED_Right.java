@@ -16,18 +16,19 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.PowerPlay_2022.FieldConstant;
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.FieldConstant;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.MecanumDrive_Roomba;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.PoseStorage;
 import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
 import java.util.List;
 
-@Autonomous(name = "Roomba Auto (RED - Bottom)", group = "Competition")
-public class Roomba_Auto_PID_RED_Bottom extends LinearOpMode {
+@Autonomous(name = "Roomba Auto (RED - Right)", group = "Competition")
+public class Roomba_Auto_PID_RED_Right extends LinearOpMode {
 
     private DcMotor LF, RF, LB, RB, Slide;
     private CRServo Turn;
     private Servo Pinch;
+    private WebcamName Webcam;
 
     private double speed = Roomba_Constants.INITIAL_SPEED;
 
@@ -53,6 +54,8 @@ public class Roomba_Auto_PID_RED_Bottom extends LinearOpMode {
 
         Turn = hardwareMap.get(CRServo.class, "Turn");
         Pinch = hardwareMap.get(Servo.class, "Pinch");
+
+        Webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
 
         // Initialize devices
         LF.setDirection(DcMotor.Direction.FORWARD);
@@ -86,25 +89,40 @@ public class Roomba_Auto_PID_RED_Bottom extends LinearOpMode {
 
         // Initialize roadrunner
         MecanumDrive_Roomba drive = new MecanumDrive_Roomba(hardwareMap);
-        Pose2d startPose = FieldConstant.RED_BOTTOM;
+        Pose2d startPose = FieldConstant.RED_RIGHT;
         drive.setPoseEstimate(startPose);
 
         // Build trajectory to medium junction
         Trajectory juncTraj = drive.trajectoryBuilder(startPose)
-                .forward(50)
-                .lineToSplineHeading(new Pose2d(10, -30, toRadians(135)))
+                .forward(25)
+                .lineToSplineHeading(new Pose2d(10, -34, toRadians(135)))
                 .build();
+
+        ElapsedTime recogTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+        recogTime.reset();
+        while (!opModeIsActive()) {
+            while (recogTime.milliseconds() <= 2000.0) {
+                if (tfod != null) {
+                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                    if (updatedRecognitions != null) {
+                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        for (Recognition recognition : updatedRecognitions) {
+                            visionResult = recognition.getLabel();
+                        }
+                        telemetry.update();
+                    }
+                }
+            }
+        }
 
         telemetry.addData(">", "Initialized.");
         telemetry.update();
 
         waitForStart();
         if (opModeIsActive()) {
-            ElapsedTime recogTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
             if (visionResult == null) {
                 recogTime.reset();
             }
-
             while (recogTime.milliseconds() <= 2000.0) {
                 if (tfod != null) {
                     List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
@@ -119,11 +137,11 @@ public class Roomba_Auto_PID_RED_Bottom extends LinearOpMode {
             }
 
             if (visionResult.equals(LABELS[0])) { // Bolt
-                END_POS = FieldConstant.RB_BOLT_PARK;
+                END_POS = FieldConstant.RR_BOLT_PARK;
             } else if (visionResult.equals(LABELS[1])) { // Bulb
-                END_POS = FieldConstant.RB_BULB_PARK;
+                END_POS = FieldConstant.RR_BULB_PARK;
             } else { // Assume panel
-                END_POS = FieldConstant.RB_PANEL_PARK;
+                END_POS = FieldConstant.RR_PANEL_PARK;
             }
 
             telemetry.addLine(visionResult);
@@ -139,15 +157,17 @@ public class Roomba_Auto_PID_RED_Bottom extends LinearOpMode {
                     })
                     .build();
             drive.followTrajectory(juncTraj2);
+            setPinched(false);
             Trajectory juncTraj3 = drive.trajectoryBuilder(juncTraj2.end())
                     .back(5)
                     .addTemporalMarker(0.75, () -> {
                         slideTo(SLIDE_INITIAL, 0.8);
                     })
+                    .lineToSplineHeading(new Pose2d(12, -12, toRadians(0)))
                     .build();
-
+            drive.followTrajectory(juncTraj3);
             Trajectory parkTraj = drive.trajectoryBuilder(juncTraj3.end())
-                    .splineToLinearHeading(END_POS, toRadians(190))
+                    .lineToSplineHeading(END_POS)
                     .build();
             drive.followTrajectory(parkTraj);
 
@@ -156,25 +176,17 @@ public class Roomba_Auto_PID_RED_Bottom extends LinearOpMode {
 
     }
 
-    //Vision
+    // Vision
     private void initVuforia() {
-        /*
-         * Configure Vuforia by creating a Parameter object, and passing it to the Vuforia engine.
-         */
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
 
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraName = hardwareMap.get(WebcamName.class, "Webcam 1");
+        parameters.cameraName = Webcam;
 
-        //  Instantiate the Vuforia engine
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
-
-        // Loading trackables is not necessary for the TensorFlow Object Detection engine.
     }
 
-    /**
-     * Initialize the TensorFlow Object Detection engine.
-     */
+    // Object Detection
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
@@ -197,6 +209,6 @@ public class Roomba_Auto_PID_RED_Bottom extends LinearOpMode {
             Pinch.setPosition(Roomba_Constants.PINCH_MAX);
         else
             Pinch.setPosition(Roomba_Constants.PINCH_MIN);
-        sleep(300);
+        sleep(500);
     }
 }

@@ -1,14 +1,11 @@
 package org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba;
 
-import static java.lang.Math.toRadians;
-
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -17,15 +14,13 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.FieldConstant;
-import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.PoseStorage;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.MecanumDrive_Roomba;
 import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
 
 import java.util.List;
 
-@Autonomous(name = "Roomba Auto (BLUE - Left)", group = "Competition")
-public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
+@Autonomous(name = "Roomba Auto Blue Left", group = "Competition")
+public class Roomba_Auto_Motor_BLUE_Left extends LinearOpMode {
 
     private DcMotor LF, RF, LB, RB, Slide;
     private CRServo Turn;
@@ -33,6 +28,7 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
     private WebcamName Webcam;
 
     private double speed = Roomba_Constants.INITIAL_SPEED;
+    private final double POWER = 0.8;
 
     //Vuforia setup for vision
     private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
@@ -92,11 +88,6 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
         //Variables
         String visionResult = null;
 
-        // Initialize roadrunner
-        MecanumDrive_Roomba drive = new MecanumDrive_Roomba(hardwareMap);
-        Pose2d startPose = new Pose2d(35, 60, drive.getExternalHeading());
-        drive.setPoseEstimate(startPose);
-
         // Build trajectory to medium junction
         ElapsedTime recogTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
         recogTime.reset();
@@ -143,15 +134,10 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
             telemetry.addLine(visionResult);
             telemetry.update();
 
-            Trajectory juncTraj = drive.trajectoryBuilder(startPose, true)
-                    .forward(20)
-                    .build();
-            drive.followTrajectory(juncTraj);
-            sleep(7000);
-            Trajectory juncTraj2 = drive.trajectoryBuilder(juncTraj.end(), true)
-                    .strafeLeft(10)
-                    .build();
-            drive.followTrajectory(juncTraj2);
+            driveStraight(false, 1000);
+            sleep(500);
+            strafe(false, 250);
+            slideTo(init);
         }
     }
 
@@ -175,6 +161,49 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
         tfodParameters.inputSize = 320;
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
+    }
+
+    private void driveStraight(boolean reversed, double time) {
+        ElapsedTime driveTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+        while (driveTime.milliseconds() < time) {
+            if (reversed) {
+                LF.setPower(-POWER);
+                LB.setPower(-POWER);
+                RB.setPower(-POWER);
+                RF.setPower(-POWER);
+            } else {
+                LF.setPower(POWER);
+                LB.setPower(POWER);
+                RB.setPower(POWER);
+                RF.setPower(POWER);
+            }
+        }
+        stopDrive();
+    }
+
+    private void strafe(boolean left, double time) {
+        ElapsedTime driveTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
+        while (driveTime.milliseconds() < time) {
+            if (left) {
+                LF.setPower(POWER);
+                LB.setPower(-POWER);
+                RB.setPower(POWER);
+                RF.setPower(-POWER);
+            } else {
+                LF.setPower(-POWER);
+                LB.setPower(POWER);
+                RB.setPower(-POWER);
+                RF.setPower(POWER);
+            }
+        }
+        stopDrive();
+    }
+
+    private void stopDrive() {
+        LF.setPower(0);
+        LB.setPower(0);
+        RB.setPower(0);
+        RF.setPower(0);
     }
 
     private void slideTo(int targetPosition, double power) {

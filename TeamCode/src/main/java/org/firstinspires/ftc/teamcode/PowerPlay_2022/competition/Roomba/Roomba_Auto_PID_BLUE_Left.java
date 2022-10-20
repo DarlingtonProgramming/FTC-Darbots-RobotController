@@ -20,6 +20,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.FieldConstant;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.PoseStorage;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.MecanumDrive_Roomba;
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
 
 import java.util.List;
@@ -94,7 +95,7 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
 
         // Initialize roadrunner
         MecanumDrive_Roomba drive = new MecanumDrive_Roomba(hardwareMap);
-        Pose2d startPose = new Pose2d(35, 60, drive.getExternalHeading());
+        Pose2d startPose = FieldConstant.BLUE_LEFT;
         drive.setPoseEstimate(startPose);
 
         // Build trajectory to medium junction
@@ -119,6 +120,7 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
         telemetry.update();
 
         waitForStart();
+        final int SLIDE_INITIAL = Slide.getCurrentPosition();
         if (opModeIsActive()) {
             if (visionResult == null) {
                 recogTime.reset();
@@ -136,22 +138,52 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
                 }
             }
 
-            while (visionResult == null) {
-                sleep(1000);
-            }
-
             telemetry.addLine(visionResult);
             telemetry.update();
 
-            Trajectory juncTraj = drive.trajectoryBuilder(startPose, true)
-                    .forward(20)
+            TrajectorySequence juncTraj = drive.trajectorySequenceBuilder(startPose)
+                    .forward(2)
+                    .strafeRight(20)
+                    .forward(50)
+                    .turn(toRadians(43))
                     .build();
-            drive.followTrajectory(juncTraj);
-            sleep(7000);
-            Trajectory juncTraj2 = drive.trajectoryBuilder(juncTraj.end(), true)
-                    .strafeLeft(10)
+            drive.followTrajectorySequence(juncTraj);
+            while (drive.isBusy()) sleep(500);
+
+            slideTo(SLIDE_INITIAL + Roomba_Constants.SL_HIGH, 0.8);
+            sleep(1750);
+
+            TrajectorySequence juncTraj3 = drive.trajectorySequenceBuilder(juncTraj.end())
+                    .forward(8)
                     .build();
-            drive.followTrajectory(juncTraj2);
+            drive.followTrajectorySequence(juncTraj3);
+            while (drive.isBusy()) sleep(250);
+
+            sleep(600);
+            setPinched(false);
+
+            TrajectorySequence juncTraj4 = drive.trajectorySequenceBuilder(juncTraj3.end())
+                    .back(7)
+                    .addDisplacementMarker(2, () -> {
+                        slideTo(SLIDE_INITIAL, 0.8);
+                    })
+                    .waitSeconds(1)
+                    .turn(toRadians(-43))
+                    .build();
+            drive.followTrajectorySequence(juncTraj4);
+            while (drive.isBusy()) sleep(300);
+
+            if (visionResult.equals(LABELS[0])) {
+                Trajectory juncTraj5 = drive.trajectoryBuilder(juncTraj4.end())
+                        .strafeLeft(45)
+                        .build();
+                drive.followTrajectory(juncTraj5);
+            } else if (visionResult.equals(LABELS[1])) {
+                Trajectory juncTraj5 = drive.trajectoryBuilder(juncTraj4.end())
+                        .strafeLeft(25)
+                        .build();
+                drive.followTrajectory(juncTraj5);
+            }
         }
     }
 

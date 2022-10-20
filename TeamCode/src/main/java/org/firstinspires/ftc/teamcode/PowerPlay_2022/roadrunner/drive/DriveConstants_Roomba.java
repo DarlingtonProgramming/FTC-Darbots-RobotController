@@ -34,7 +34,7 @@ public class DriveConstants_Roomba {
      * from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = true;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(20, 0, 10,
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(40, 0, 13,
             12.87872);
 
     /*
@@ -46,8 +46,8 @@ public class DriveConstants_Roomba {
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
     public static double WHEEL_RADIUS = 1.9685; // in
-    public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 10.8; // in
+    public static double GEAR_RATIO = 1.370104595090183; // output (wheel) speed / input (motor) speed
+    public static double TRACK_WIDTH = 9.7; // in
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -89,8 +89,8 @@ public class DriveConstants_Roomba {
      */
     public static double MAX_VEL = 46.743540471846245;
     public static double MAX_ACCEL = 46.743540471846245;
-    public static double MAX_ANG_VEL = Math.toRadians(250.58217599999998);
-    public static double MAX_ANG_ACCEL = Math.toRadians(250.58217599999998);
+    public static double MAX_ANG_VEL = 15.851832582393046;
+    public static double MAX_ANG_ACCEL = 4.373484018011914;
 
 
     public static double encoderTicksToInches(double ticks) {

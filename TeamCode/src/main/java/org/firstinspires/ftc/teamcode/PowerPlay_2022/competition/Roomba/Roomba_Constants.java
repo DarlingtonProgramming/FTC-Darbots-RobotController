@@ -11,7 +11,7 @@ public class Roomba_Constants {
     public static final double TURN_MIDPOINT = (TURN_MAX + TURN_MIN) / 2;
 
     public static final double PINCH_MIN = 0.03;
-    public static final double PINCH_MAX = 0.8;
+    public static final double PINCH_MAX = 0.9;
     public static final double PINCH_MIDPOINT = (PINCH_MAX + PINCH_MIN) / 2;
 
     public static final int SL_GROUND = 0;

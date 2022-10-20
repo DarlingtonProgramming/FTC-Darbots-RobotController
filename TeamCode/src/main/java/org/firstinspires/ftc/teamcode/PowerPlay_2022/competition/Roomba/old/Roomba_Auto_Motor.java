@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba;
+package org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba.old;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -14,20 +13,20 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.MecanumDrive_Roomba;
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba.Roomba_Constants;
 import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
 
 import java.util.List;
 
-@Autonomous(name = "Roomba Auto Blue Left", group = "Competition")
-public class Roomba_Auto_Motor_BLUE_Left extends LinearOpMode {
+@Disabled
+@Autonomous(name = "Roomba Auto (ALL)", group = "Competition")
+public class Roomba_Auto_Motor extends LinearOpMode {
 
     private DcMotor LF, RF, LB, RB, Slide;
     private CRServo Turn;
     private Servo Pinch;
     private WebcamName Webcam;
 
-    private double speed = Roomba_Constants.INITIAL_SPEED;
     private final double POWER = 0.8;
 
     //Vuforia setup for vision
@@ -57,14 +56,9 @@ public class Roomba_Auto_Motor_BLUE_Left extends LinearOpMode {
 
         // Initialize devices
         LF.setDirection(DcMotor.Direction.FORWARD);
-        RF.setDirection(DcMotor.Direction.FORWARD);
+        RF.setDirection(DcMotor.Direction.REVERSE);
         LB.setDirection(DcMotor.Direction.FORWARD);
-        RB.setDirection(DcMotor.Direction.FORWARD);
-
-        LF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        RB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RB.setDirection(DcMotor.Direction.REVERSE);
 
         Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Pinch.setDirection(Servo.Direction.REVERSE);
@@ -138,6 +132,7 @@ public class Roomba_Auto_Motor_BLUE_Left extends LinearOpMode {
             sleep(500);
             strafe(false, 250);
 
+            strafe(false, 500);
         }
     }
 
@@ -184,7 +179,7 @@ public class Roomba_Auto_Motor_BLUE_Left extends LinearOpMode {
     private void strafe(boolean left, double time) {
         ElapsedTime driveTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
         while (driveTime.milliseconds() < time) {
-            if (left) {
+            if (!left) {
                 LF.setPower(POWER);
                 LB.setPower(-POWER);
                 RB.setPower(POWER);

@@ -10,24 +10,28 @@ import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 
 public class MeepMeepTesting {
     public static void main(String[] args) {
-        MeepMeep meepMeep = new MeepMeep(800);
-        Pose2d start = new Pose2d(35, 60, toRadians(90));
+        MeepMeep meepMeep = new MeepMeep(700);
+        Pose2d start = new Pose2d(30, 63, toRadians(270));
 
         RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(46.743540471846245, 46.743540471846245, Math.toRadians(250.58217599999998), Math.toRadians(250.58217599999998), 10.5)
+                .setDimensions(13, 15)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(start)
-                                .back(25)
-                                .lineToSplineHeading(new Pose2d(10, 34, toRadians(225)))
-                                .forward(5)
-                                .back(5)
-                                .lineToSplineHeading(new Pose2d(12, 12, toRadians(180)))
+                                .forward(2)
+                                .strafeRight(20)
                                 //.forward(50)
-                                //.lineToSplineHeading(new Pose2d(-24, -12, toRadians(90)))
-                                //.forward(5)
-                                //.back(5)
-                                .lineToSplineHeading(new Pose2d(0, -60, toRadians(0)))
+                                //.turn(toRadians(43))
+                                .lineToSplineHeading(new Pose2d(16, 8, toRadians(315)))
+                                .waitSeconds(2)
+                                .back(5)
+                                .lineToSplineHeading(new Pose2d(62, 11.5, toRadians(0)))
+                                .lineToSplineHeading(new Pose2d(23.5, 12, toRadians(270)))
+                                .waitSeconds(2)
+                                .forward(5)
+                                .waitSeconds(1)
+                                .back(5)
+                                .strafeLeft(15)
                                 .build()
                 );
 

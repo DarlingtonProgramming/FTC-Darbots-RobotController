@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.opmode;
+package org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.opmode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -32,7 +32,7 @@ import static org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.Dri
  *      regression.
  */
 @Config
-@Autonomous(name="Auto FeedforwardTuner", group= "drive")
+@Autonomous(group = "drive")
 public class AutomaticFeedforwardTuner extends LinearOpMode {
     public static double MAX_POWER = 0.7;
     public static double DISTANCE = 100; // in

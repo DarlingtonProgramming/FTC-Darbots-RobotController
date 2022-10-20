@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
 
 import java.util.List;
-
+@Disabled
 @TeleOp(name = "PP Recognition Test", group = "Concept")
 public class PPObjectDetection_Test extends LinearOpMode {
     private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";

@@ -21,8 +21,8 @@ import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
 
 import java.util.List;
 
-@Autonomous(name = "Roomba Auto (BLUE - Left)", group = "Competition")
-public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
+@Autonomous(name = "Roomba Auto (Left)", group = "Competition")
+public class Roomba_Auto_PID_Left extends LinearOpMode {
 
     private DcMotor LF, RF, LB, RB, Slide;
     private CRServo Turn;
@@ -128,8 +128,8 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
             TrajectorySequence juncTraj = drive.trajectorySequenceBuilder(startPose)
                     .forward(2)
                     .strafeRight(20)
-                    .forward(50)
-                    .turn(toRadians(43))
+                    .forward(48)
+                    .turn(toRadians(39))
                     .build();
             drive.followTrajectorySequence(juncTraj);
             while (drive.isBusy()) sleep(500);
@@ -138,7 +138,7 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
             sleep(1750);
 
             TrajectorySequence juncTraj3 = drive.trajectorySequenceBuilder(juncTraj.end())
-                    .forward(8)
+                    .forward(9)
                     .build();
             drive.followTrajectorySequence(juncTraj3);
             while (drive.isBusy()) sleep(250);
@@ -148,11 +148,11 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
 
             TrajectorySequence juncTraj4 = drive.trajectorySequenceBuilder(juncTraj3.end())
                     .back(7)
-                    .addDisplacementMarker(2, () -> {
-                        slideTo(SLIDE_INITIAL, 0.8);
+                    .addDisplacementMarker(5, () -> {
+                        slideTo(SLIDE_INITIAL, 0.5);
                     })
                     .waitSeconds(1)
-                    .turn(toRadians(-43))
+                    .turn(toRadians(-39))
                     .build();
             drive.followTrajectorySequence(juncTraj4);
             while (drive.isBusy()) sleep(300);

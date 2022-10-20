@@ -11,12 +11,8 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
-
-import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
-import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
-import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.detection.PPDetector;
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.detection.classification.Classifier;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.FieldConstant;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.PoseStorage;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.MecanumDrive_Roomba;
@@ -31,20 +27,18 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
     private DcMotor LF, RF, LB, RB, Slide;
     private CRServo Turn;
     private Servo Pinch;
-    private WebcamName Webcam;
-
     private double speed = Roomba_Constants.INITIAL_SPEED;
 
-    //Vuforia setup for vision
-    private static final String TFOD_MODEL_ASSET = "PowerPlay.tflite";
+    // Sleeve detection setup
+    private static String MODEL_FILE_NAME = "pp_model.tflite";
+    private static String LABEL_FILE_NAME = "pp_labels.txt";
     private static final String[] LABELS = {
-            "1 Bolt",
-            "2 Bulb",
-            "3 Panel"
+            "0 eyes",
+            "1 bat",
+            "2 lantern"
     };
-    private static final String VUFORIA_KEY = Robot4100Common.VUFORIA_LICENSE;
-    private VuforiaLocalizer vuforia;
-    private TFObjectDetector tfod;
+    private static Classifier.Model MODEl_TYPE = Classifier.Model.FLOAT_EFFICIENTNET;
+    private PPDetector sleeveDetector = null;
 
     @Override
     public void runOpMode() {
@@ -57,8 +51,6 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
 
         Turn = hardwareMap.get(CRServo.class, "Turn");
         Pinch = hardwareMap.get(Servo.class, "Pinch");
-
-        Webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
 
         // Initialize devices
         LF.setDirection(DcMotor.Direction.FORWARD);
@@ -79,16 +71,11 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
         RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        //initialize position
+        // Initialize position
         Pinch.setPosition(Roomba_Constants.PINCH_MAX);
 
-        //Vision
-        initVuforia();
-        initTfod();
-        if (tfod != null) {
-            tfod.activate();
-            tfod.setZoom(1, 16.0/9.0);
-        }
+        // Detection
+        initDetection();
 
         //Variables
         String visionResult = null;
@@ -98,47 +85,44 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
         Pose2d startPose = FieldConstant.BLUE_LEFT;
         drive.setPoseEstimate(startPose);
 
-        // Build trajectory to medium junction
-        ElapsedTime recogTime = new ElapsedTime(ElapsedTime.Resolution.MILLISECONDS);
-        recogTime.reset();
         while (!opModeIsActive()) {
-            while (recogTime.milliseconds() <= 2000.0) {
-                if (tfod != null) {
-                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                    if (updatedRecognitions != null) {
-                        telemetry.addData("# Object Detected", updatedRecognitions.size());
-                        for (Recognition recognition : updatedRecognitions) {
-                            visionResult = recognition.getLabel();
+            while (visionResult == null) {
+                List<Classifier.Recognition> results = sleeveDetector.getLastResults();
+                if (results == null || results.size() == 0){
+                    telemetry.addData("Info", "No results");
+                } else {
+                    for (Classifier.Recognition r : results) {
+                        if (r.getConfidence() > 0.8f) {
+                            visionResult = r.getTitle();
                         }
-                        telemetry.update();
                     }
                 }
             }
         }
+        if (sleeveDetector != null){
+            sleeveDetector.stopProcessing();
+        }
 
-        telemetry.addData(">", "Initialized.");
+        telemetry.addData(">", "Finished initialization.");
         telemetry.update();
 
         waitForStart();
         final int SLIDE_INITIAL = Slide.getCurrentPosition();
         if (opModeIsActive()) {
-            if (visionResult == null) {
-                recogTime.reset();
-            }
-            while (recogTime.milliseconds() <= 2000.0) {
-                if (tfod != null) {
-                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                    if (updatedRecognitions != null) {
-                        telemetry.addData("# Object Detected", updatedRecognitions.size());
-                        for (Recognition recognition : updatedRecognitions) {
-                            visionResult = recognition.getLabel();
+            while (visionResult == null) {
+                List<Classifier.Recognition> results = sleeveDetector.getLastResults();
+                if (results == null || results.size() == 0){
+                    telemetry.addData("Info", "No results");
+                } else  {
+                    for (Classifier.Recognition r : results) {
+                        if (r.getConfidence() > 0.8f) {
+                            visionResult = r.getTitle();
                         }
                         telemetry.update();
                     }
                 }
             }
-
-            telemetry.addLine(visionResult);
+            telemetry.addLine("Found: " + visionResult);
             telemetry.update();
 
             TrajectorySequence juncTraj = drive.trajectorySequenceBuilder(startPose)
@@ -175,38 +159,29 @@ public class Roomba_Auto_PID_BLUE_Left extends LinearOpMode {
 
             if (visionResult.equals(LABELS[0])) {
                 Trajectory juncTraj5 = drive.trajectoryBuilder(juncTraj4.end())
-                        .strafeLeft(45)
+                        .strafeLeft(25)
                         .build();
                 drive.followTrajectory(juncTraj5);
             } else if (visionResult.equals(LABELS[1])) {
                 Trajectory juncTraj5 = drive.trajectoryBuilder(juncTraj4.end())
-                        .strafeLeft(25)
+                        .strafeLeft(45)
                         .build();
                 drive.followTrajectory(juncTraj5);
             }
         }
     }
 
-    // Vision
-    private void initVuforia() {
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+    private void initDetection() {
+        try {
+            try {
+                sleeveDetector = new PPDetector(MODEl_TYPE, MODEL_FILE_NAME, LABEL_FILE_NAME, hardwareMap.appContext, telemetry);
+                sleeveDetector.activate();
+            } catch (Exception ex) {
+                telemetry.addData("Error", String.format("Unable to initialize sleeve detector. %s", ex.getMessage()));
+            }
+        } finally {
 
-        parameters.vuforiaLicenseKey = VUFORIA_KEY;
-        parameters.cameraName = Webcam;
-
-        vuforia = ClassFactory.getInstance().createVuforia(parameters);
-    }
-
-    // Object Detection
-    private void initTfod() {
-        int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
-                "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
-        tfodParameters.minResultConfidence = 0.40f;
-        tfodParameters.isModelTensorFlow2 = true;
-        tfodParameters.inputSize = 320;
-        tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
-        tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABELS);
+        }
     }
 
     private void slideTo(int targetPosition, double power) {

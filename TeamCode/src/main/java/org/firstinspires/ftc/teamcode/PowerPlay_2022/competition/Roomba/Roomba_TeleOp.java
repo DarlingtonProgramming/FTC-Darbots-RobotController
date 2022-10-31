@@ -41,8 +41,15 @@ public class Roomba_TeleOp extends LinearOpMode {
         Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Pinch.setDirection(Servo.Direction.REVERSE);
 
+        LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         // Use slide positions
         final int SLIDE_INITIAL = Slide.getCurrentPosition();
+        Slide.setTargetPosition(SLIDE_INITIAL);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Set power variables
         double LFPower;

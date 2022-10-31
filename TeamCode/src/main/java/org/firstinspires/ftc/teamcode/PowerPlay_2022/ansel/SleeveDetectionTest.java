@@ -10,7 +10,6 @@ import org.firstinspires.ftc.teamcode.PowerPlay_2022.detection.classification.Cl
 
 import java.util.List;
 
-@Disabled
 @Autonomous(name = "Detection Test", group = "2")
 public class SleeveDetectionTest extends LinearOpMode{
 
@@ -19,7 +18,7 @@ public class SleeveDetectionTest extends LinearOpMode{
     private ElapsedTime runtime = new ElapsedTime();
 
     private static String MODEL_FILE_NAME = "pp_model.tflite";
-    private static String LABEL_FILE_NAME = "pp_labels.txt";
+    private static String LABEL_FILE_NAME = "labels.txt";
     private static Classifier.Model MODEl_TYPE = Classifier.Model.FLOAT_EFFICIENTNET;
 
     @Override

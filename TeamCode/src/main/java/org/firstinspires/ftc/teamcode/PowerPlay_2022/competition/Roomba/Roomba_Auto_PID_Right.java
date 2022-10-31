@@ -31,11 +31,11 @@ public class Roomba_Auto_PID_Right extends LinearOpMode {
 
     // Sleeve detection setup
     private static String MODEL_FILE_NAME = "pp_model.tflite";
-    private static String LABEL_FILE_NAME = "pp_labels.txt";
+    private static String LABEL_FILE_NAME = "labels.txt";
     private static final String[] LABELS = {
-            "0 eyes",
-            "1 bat",
-            "2 lantern"
+            "0 bat",
+            "1 lantern",
+            "2 eyes"
     };
     private static Classifier.Model MODEl_TYPE = Classifier.Model.FLOAT_EFFICIENTNET;
     private PPDetector sleeveDetector = null;
@@ -86,18 +86,16 @@ public class Roomba_Auto_PID_Right extends LinearOpMode {
         drive.setPoseEstimate(startPose);
 
         while (!opModeIsActive()) {
-            while (visionResult == null) {
                 List<Classifier.Recognition> results = sleeveDetector.getLastResults();
                 if (results == null || results.size() == 0){
                     telemetry.addData("Info", "No results");
                 } else {
                     for (Classifier.Recognition r : results) {
-                        if (r.getConfidence() > 0.8f) {
+                        if (r.getConfidence() > 0.6f) {
                             visionResult = r.getTitle();
                         }
                     }
                 }
-            }
         }
         if (sleeveDetector != null){
             sleeveDetector.stopProcessing();
@@ -115,12 +113,15 @@ public class Roomba_Auto_PID_Right extends LinearOpMode {
                     telemetry.addData("Info", "No results");
                 } else  {
                     for (Classifier.Recognition r : results) {
-                        if (r.getConfidence() > 0.8f) {
+                        if (r.getConfidence() > 0.6f) {
                             visionResult = r.getTitle();
                         }
                         telemetry.update();
                     }
                 }
+            }
+            if (sleeveDetector != null){
+                sleeveDetector.stopProcessing();
             }
             telemetry.addLine("Found: " + visionResult);
             telemetry.update();
@@ -129,7 +130,7 @@ public class Roomba_Auto_PID_Right extends LinearOpMode {
                     .forward(2)
                     .strafeLeft(30)
                     .forward(50)
-                    .turn(toRadians(-47))
+                    .turn(toRadians(-52.25))
                     .build();
             drive.followTrajectorySequence(juncTraj);
             while (drive.isBusy()) sleep(500);
@@ -144,27 +145,32 @@ public class Roomba_Auto_PID_Right extends LinearOpMode {
             while (drive.isBusy()) sleep(250);
 
             sleep(600);
+            slideTo(Slide.getCurrentPosition() - 105, 0.8);
+            sleep(600);
             setPinched(false);
+            sleep(600);
+            slideTo(Slide.getCurrentPosition() + 105, 0.8);
+            sleep(600);
 
             TrajectorySequence juncTraj4 = drive.trajectorySequenceBuilder(juncTraj3.end())
-                    .back(4)
+                    .back(6)
                     .addDisplacementMarker(2, () -> {
                         slideTo(SLIDE_INITIAL, 0.8);
                     })
                     .waitSeconds(1)
-                    .turn(toRadians(47))
+                    .turn(toRadians(52.25))
                     .build();
             drive.followTrajectorySequence(juncTraj4);
             while (drive.isBusy()) sleep(300);
 
-            if (visionResult.equals(LABELS[0])) { // eyes
+            if (visionResult.equals(LABELS[0])) {
                 Trajectory juncTraj5 = drive.trajectoryBuilder(juncTraj4.end())
-                        .strafeRight(22)
+                        .strafeRight(44)
                         .build();
                 drive.followTrajectory(juncTraj5);
-            } else if (visionResult.equals(LABELS[1])) { // bat
+            } else if (visionResult.equals(LABELS[2])) {
                 Trajectory juncTraj5 = drive.trajectoryBuilder(juncTraj4.end())
-                        .strafeRight(41)
+                        .strafeRight(22)
                         .build();
                 drive.followTrajectory(juncTraj5);
             }

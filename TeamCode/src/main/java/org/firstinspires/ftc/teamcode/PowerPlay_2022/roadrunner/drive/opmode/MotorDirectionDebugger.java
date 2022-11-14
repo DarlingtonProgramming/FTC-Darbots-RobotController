@@ -38,7 +38,6 @@ import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.MecanumDri
  *
  * Uncomment the @Disabled tag below to use this opmode.
  */
-@Disabled
 @Config
 @TeleOp(group = "drive")
 public class MotorDirectionDebugger extends LinearOpMode {

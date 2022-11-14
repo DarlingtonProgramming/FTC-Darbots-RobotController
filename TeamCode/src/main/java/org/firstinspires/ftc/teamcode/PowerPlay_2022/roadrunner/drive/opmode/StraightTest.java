@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.MecanumDri
 /*
  * This is a simple routine to test translational drive capabilities.
  */
-@Disabled
 @Config
 @Autonomous(group = "drive")
 public class StraightTest extends LinearOpMode {

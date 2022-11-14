@@ -5,7 +5,7 @@ import static java.lang.Math.toRadians;
 
 public class FieldConstant {
     // Blue
-    public static final Pose2d BLUE_LEFT = new Pose2d(33, 60, toRadians(270));
+    public static final Pose2d BLUE_LEFT = new Pose2d(30, 61.5, toRadians(270));
     public static final Pose2d BLUE_RIGHT = new Pose2d(-35, 60, toRadians(270));
 
     public static final Pose2d BL_BOLT_PARK = new Pose2d(-12, 12, toRadians(90));

@@ -475,7 +475,7 @@ public class DriveMethod {
             RF.setPower(RF_power);
             LB.setPower(LB_power);
             RB.setPower(RB_power);
-//            telemetry.addData("RF_power", RF_power);
+//            telemetry.addData("RF_p   ower", RF_power);
 //            telemetry.addData("RB_power", RB_power);
 //            telemetry.addData("LF_power", LF_power);
 //            telemetry.addData("LB_power", LB_power);

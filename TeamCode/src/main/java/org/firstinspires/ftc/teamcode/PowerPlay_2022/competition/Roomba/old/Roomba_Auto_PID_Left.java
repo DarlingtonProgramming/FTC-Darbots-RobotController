@@ -1,16 +1,18 @@
-package org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba;
+package org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba.old;
 
 import static java.lang.Math.toRadians;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba.Settings.Roomba_Constants;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.detection.PPDetector;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.detection.classification.Classifier;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.FieldConstant;
@@ -19,6 +21,7 @@ import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.trajectorysequen
 
 import java.util.List;
 
+@Disabled
 @Autonomous(name = "Roomba Auto (Left)", group = "Competition")
 public class Roomba_Auto_PID_Left extends LinearOpMode {
 

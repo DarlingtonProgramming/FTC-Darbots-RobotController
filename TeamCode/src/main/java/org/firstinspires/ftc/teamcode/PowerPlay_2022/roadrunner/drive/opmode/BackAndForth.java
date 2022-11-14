@@ -25,7 +25,6 @@ import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.MecanumDri
  * This opmode is designed as a convenient, coarse tuning for the follower PID coefficients. It
  * is recommended that you use the FollowerPIDTuner opmode for further fine tuning.
  */
-@Disabled
 @Config
 @Autonomous(group = "drive")
 public class BackAndForth extends LinearOpMode {

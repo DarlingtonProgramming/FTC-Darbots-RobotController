@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba;
+package org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -7,7 +7,9 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name = "Roomba TeleOp", group = "Competition")
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.competition.Roomba.Settings.Roomba_Constants;
+
+@TeleOp(name = "Roomba TeleOp Old", group = "Competition")
 public class Roomba_TeleOp extends LinearOpMode {
     private DcMotor LF, RF, LB, RB, Slide;
     private CRServo Turn;
@@ -47,8 +49,8 @@ public class Roomba_TeleOp extends LinearOpMode {
         RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         // Use slide positions
-        final int SLIDE_INITIAL = Slide.getCurrentPosition();
-        Slide.setTargetPosition(SLIDE_INITIAL);
+        int slideInitial = Slide.getCurrentPosition();
+        Slide.setTargetPosition(slideInitial);
         Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Set power variables
@@ -57,9 +59,6 @@ public class Roomba_TeleOp extends LinearOpMode {
         double LBPower;
         double RBPower;
 
-        // Initialize pinch position
-        Pinch.setPosition(Roomba_Constants.PINCH_MIN);
-
         // Update telemetry
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -67,7 +66,7 @@ public class Roomba_TeleOp extends LinearOpMode {
         waitForStart();
 
         // Gamepad 1
-        boolean releasedA1 = true, releasedB1 = true;
+        boolean releasedA1 = true, releasedB1 = true, releasedY1 = true;
         boolean releasedDU1 = true, releasedDD1 = true;
         boolean releasedRB1 = true;
         boolean releasedLT1 = true;
@@ -75,7 +74,7 @@ public class Roomba_TeleOp extends LinearOpMode {
         // Gamepad 2
         boolean releasedA2 = true, releasedB2 = true, releasedX2 = true, releasedY2 = true;
         boolean releasedDL2 = true, releasedDR2 = true, releasedDU2 = true, releasedDD2 = true;
-        boolean releasedLB2 = true, releasedRB2 = true;
+        boolean releasedLB1 = true, releasedLB2 = true, releasedRB2 = true;
         boolean releasedLT2 = true, releasedRT2 = true;
 
         while (opModeIsActive()) {
@@ -96,6 +95,21 @@ public class Roomba_TeleOp extends LinearOpMode {
                 releasedB1 = false;
             } else if (!releasedB1) {
                 releasedB1 = true;
+            }
+
+            if (gamepad1.y) {
+//                TrajectorySequence traj = chassis.trajectorySequenceBuilder(chassis.getPoseEstimate())
+//                        .addDisplacementMarker(() -> {
+//                            Slide.setTargetPosition(slideInitial + 285);
+//                            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                            Slide.setPower(0.7);
+//                        })
+//                        .lineToSplineHeading(new Pose2d(64, 12, toRadians(0)))
+//                        .build();
+//                chassis.followTrajectorySequenceAsync(traj);
+                releasedY1 = false;
+            } else if (!releasedY1) {
+                releasedY1 = true;
             }
 
             if (gamepad1.dpad_up) {
@@ -131,7 +145,7 @@ public class Roomba_TeleOp extends LinearOpMode {
 
             if (gamepad2.a) {
                 if (releasedA2) {
-                    Slide.setTargetPosition(SLIDE_INITIAL);
+                    Slide.setTargetPosition(slideInitial);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(0.7);
                     releasedA2 = false;
@@ -142,7 +156,7 @@ public class Roomba_TeleOp extends LinearOpMode {
 
             if (gamepad2.b) {
                 if (releasedB2) {
-                    Slide.setTargetPosition(SLIDE_INITIAL + Roomba_Constants.SL_LOW);
+                    Slide.setTargetPosition(slideInitial + Roomba_Constants.SL_LOW);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(0.8);
                     releasedB2 = false;
@@ -153,7 +167,7 @@ public class Roomba_TeleOp extends LinearOpMode {
 
             if (gamepad2.x) {
                 if (releasedX2) {
-                    Slide.setTargetPosition(SLIDE_INITIAL + Roomba_Constants.SL_MEDIUM);
+                    Slide.setTargetPosition(slideInitial + Roomba_Constants.SL_MEDIUM);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(0.8);
                     releasedX2 = false;
@@ -164,7 +178,7 @@ public class Roomba_TeleOp extends LinearOpMode {
 
             if (gamepad2.y) {
                 if (releasedY2) {
-                    Slide.setTargetPosition(SLIDE_INITIAL + Roomba_Constants.SL_HIGH);
+                    Slide.setTargetPosition(slideInitial + Roomba_Constants.SL_HIGH);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                     Slide.setPower(0.8);
                     releasedY2 = false;
@@ -176,6 +190,8 @@ public class Roomba_TeleOp extends LinearOpMode {
             if (gamepad2.dpad_up) {
                 if (releasedDU2) {
                     Slide.setTargetPosition(Slide.getCurrentPosition() + 105);
+                    Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Slide.setPower(0.8);
                     releasedDU2 = false;
                 }
             } else if (!releasedDU2){
@@ -185,6 +201,8 @@ public class Roomba_TeleOp extends LinearOpMode {
             if (gamepad2.dpad_down) {
                 if (releasedDD2) {
                     Slide.setTargetPosition(Slide.getCurrentPosition() - 105);
+                    Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Slide.setPower(0.8);
                     releasedDD2 = false;
                 }
             } else if (!releasedDD2) {
@@ -222,6 +240,15 @@ public class Roomba_TeleOp extends LinearOpMode {
                 releasedLT2 = true;
             }
             */
+
+            if (gamepad2.left_bumper) {
+                if (releasedLB1) {
+                    slideInitial = Slide.getCurrentPosition();
+                    releasedLB1 = false;
+                }
+            } else if (!releasedLB1) {
+                releasedLB1 = true;
+            }
 
             if (gamepad2.right_bumper) {
                 if (releasedRB2) {

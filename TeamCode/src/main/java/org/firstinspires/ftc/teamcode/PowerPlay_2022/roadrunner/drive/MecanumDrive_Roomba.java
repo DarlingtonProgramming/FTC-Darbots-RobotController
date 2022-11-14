@@ -45,8 +45,8 @@ import static org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.Dri
  */
 @Config
 public class MecanumDrive_Roomba extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(5, 0, 0);
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(5.5, 0, 0);
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(4, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(5, 0, 0);
 
     public static double LATERAL_MULTIPLIER = 1.220456831478169;
 

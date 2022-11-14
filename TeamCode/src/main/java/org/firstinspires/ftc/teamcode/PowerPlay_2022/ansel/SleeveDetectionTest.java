@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.PowerPlay_2022.ansel;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -17,7 +16,7 @@ public class SleeveDetectionTest extends LinearOpMode{
     private PPDetector tfDetector = null;
     private ElapsedTime runtime = new ElapsedTime();
 
-    private static String MODEL_FILE_NAME = "pp_model.tflite";
+    private static String MODEL_FILE_NAME = "Red.tflite";
     private static String LABEL_FILE_NAME = "labels.txt";
     private static Classifier.Model MODEl_TYPE = Classifier.Model.FLOAT_EFFICIENTNET;
 

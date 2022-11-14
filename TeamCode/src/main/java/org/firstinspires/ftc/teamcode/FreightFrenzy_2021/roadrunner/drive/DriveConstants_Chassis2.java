@@ -32,7 +32,7 @@ public class DriveConstants_Chassis2 {
      * from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = true;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(30, 0, 15,
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(35, 0, 15,
             13.55);//9.9
     //f:getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV)
 

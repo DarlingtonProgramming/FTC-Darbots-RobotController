@@ -63,7 +63,6 @@ import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.StandardTr
  * precision. The heading should still line up.
  */
 
-@Disabled
 @Config
 @TeleOp(group = "drive")
 public class TrackingWheelLateralDistanceTuner extends LinearOpMode {

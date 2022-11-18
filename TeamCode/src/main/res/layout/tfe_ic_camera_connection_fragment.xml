@@ -17,7 +17,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <org.firstinspires.ftc.teamcode.PowerPlay_2022.detection.views.AutoFitTextureView
+    <org.firstinspires.ftc.teamcode.PowerPlay_2022.Competition.Roomba.Subsystems.Detection.TFTeachableMachine.views.AutoFitTextureView
         android:id="@+id/texture"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

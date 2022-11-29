@@ -31,7 +31,7 @@ public class RoombaTeleOp extends LinearOpMode {
         LF.setDirection(DcMotor.Direction.FORWARD);
         RF.setDirection(DcMotor.Direction.REVERSE);
         LB.setDirection(DcMotor.Direction.FORWARD);
-        RB.setDirection(DcMotor.Direction.REVERSE);
+        RB.setDirection(DcMotor.Direction.FORWARD);
 
         LF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -74,7 +74,7 @@ public class RoombaTeleOp extends LinearOpMode {
         while (opModeIsActive()) {
 
             double drive = -gamepad1.left_stick_y;
-            double strafe  = -gamepad1.left_stick_x;
+            double strafe  = gamepad1.left_stick_x;
             double rotate = gamepad1.right_stick_x;
 
             if (gamepad1.a) {
@@ -137,7 +137,7 @@ public class RoombaTeleOp extends LinearOpMode {
                 if (releasedB2) {
                     Slide.setTargetPosition(SLIDE_INITIAL + 1200);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    Slide.setPower(0.8);
+                    Slide.setPower(-0.7);
                     releasedB2 = false;
                 }
             } else if (!releasedB2) {
@@ -190,7 +190,8 @@ public class RoombaTeleOp extends LinearOpMode {
                     Turn.setPower(Roomba_Constants.TURN_MIN);
                     releasedDL2 = false;
                 }
-            } else if (!releasedDL2) {
+            }
+            else if (!releasedDL2) {
                 Turn.setPower(0);
                 releasedDL2 = true;
             }
@@ -211,10 +212,16 @@ public class RoombaTeleOp extends LinearOpMode {
                     else Turn.setPosition(Roomba_Constants.TURN_MAX);
                     releasedLT2 = false;
                 }
-            } else if (!releasedLT2) {
-                releasedLT2 = true;
             }
-            */
+            else if (!releasedDL2) {
+                Turn.setPower(0);
+                releasedDL2 = true;
+            }
+
+            if(gamepad2.left_stick_x<-.1 || gamepad2.left_stick_x >.1){
+                Turn.setPower(gamepad2.left_stick_x);
+            }
+
 
             if (gamepad2.right_bumper) {
                 if (releasedRB2) {

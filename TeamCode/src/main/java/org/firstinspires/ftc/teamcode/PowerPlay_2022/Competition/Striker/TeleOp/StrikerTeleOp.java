@@ -1,19 +1,20 @@
-package org.firstinspires.ftc.teamcode.PowerPlay_2022.Competition.Roomba.TeleOp;
+package org.firstinspires.ftc.teamcode.PowerPlay_2022.Competition.Striker.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name = "Roomba TeleOp Old", group = "Competition")
-public class RoombaTeleOp extends LinearOpMode {
-    private DcMotor LF, RF, LB, RB, Slide;
-    private CRServo Turn;
+import org.firstinspires.ftc.teamcode.PowerPlay_2022.Competition.Roomba.Settings.RoombaConstants;
+
+@TeleOp(name = "Striker TeleOp", group = "Competition")
+public class StrikerTeleOp extends LinearOpMode {
+    private DcMotor LF, RF, LB, RB, Slide, Turn;
     private Servo Pinch;
 
-    private double speed = 0.5;
+    private double speed = RoombaConstants.INITIAL_SPEED;
 
     @Override
     public void runOpMode() {
@@ -23,35 +24,38 @@ public class RoombaTeleOp extends LinearOpMode {
         LB = hardwareMap.get(DcMotor.class, "LB");
         RB = hardwareMap.get(DcMotor.class, "RB");
         Slide = hardwareMap.get(DcMotor.class, "Slide");
-
-        Turn = hardwareMap.get(CRServo.class, "Turn");
+        Turn = hardwareMap.get(DcMotor.class, "Turn");
         Pinch = hardwareMap.get(Servo.class, "Pinch");
 
         // Initialize devices
         LF.setDirection(DcMotor.Direction.FORWARD);
         RF.setDirection(DcMotor.Direction.REVERSE);
         LB.setDirection(DcMotor.Direction.FORWARD);
-        RB.setDirection(DcMotor.Direction.REVERSE);
+        RB.setDirection(DcMotor.Direction.FORWARD);
 
         LF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RF.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         LB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RB.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        LF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        LB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RF.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        RB.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        Pinch.setDirection(Servo.Direction.REVERSE);
+        Slide.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // Use slide positions
-        final int SLIDE_INITIAL = Slide.getCurrentPosition();
+        int slideInitial = Slide.getCurrentPosition();
+        Slide.setTargetPosition(slideInitial);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Set power variables
         double LFPower;
         double RFPower;
         double LBPower;
         double RBPower;
-
-        // Initialize pinch position
-        Pinch.setPosition(0.03);
 
         // Update telemetry
         telemetry.addData("Status", "Initialized");
@@ -60,7 +64,7 @@ public class RoombaTeleOp extends LinearOpMode {
         waitForStart();
 
         // Gamepad 1
-        boolean releasedA1 = true, releasedB1 = true;
+        boolean releasedA1 = true, releasedB1 = true, releasedY1 = true;
         boolean releasedDU1 = true, releasedDD1 = true;
         boolean releasedRB1 = true;
         boolean releasedLT1 = true;
@@ -68,32 +72,47 @@ public class RoombaTeleOp extends LinearOpMode {
         // Gamepad 2
         boolean releasedA2 = true, releasedB2 = true, releasedX2 = true, releasedY2 = true;
         boolean releasedDL2 = true, releasedDR2 = true, releasedDU2 = true, releasedDD2 = true;
-        boolean releasedLB2 = true, releasedRB2 = true;
+        boolean releasedLB1 = true, releasedLB2 = true, releasedRB2 = true;
         boolean releasedLT2 = true, releasedRT2 = true;
 
         while (opModeIsActive()) {
 
             double drive = -gamepad1.left_stick_y;
             double strafe  = -gamepad1.left_stick_x;
-            double rotate = gamepad1.right_stick_x;
+            double rotate = -gamepad1.right_stick_x;
 
             if (gamepad1.a) {
-                speed = 0.35;
+                speed = RoombaConstants.LOW_SPEED;
                 releasedA1 = false;
             } else if (!releasedA1) {
                 releasedA1 = true;
             }
 
             if (gamepad1.b) {
-                speed = 0.6;
+                speed = RoombaConstants.HIGH_SPEED;
                 releasedB1 = false;
             } else if (!releasedB1) {
                 releasedB1 = true;
             }
 
+            if (gamepad1.y) {
+//                TrajectorySequence traj = chassis.trajectorySequenceBuilder(chassis.getPoseEstimate())
+//                        .addDisplacementMarker(() -> {
+//                            Slide.setTargetPosition(slideInitial + 285);
+//                            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//                            Slide.setPower(0.7);
+//                        })
+//                        .lineToSplineHeading(new Pose2d(64, 12, toRadians(0)))
+//                        .build();
+//                chassis.followTrajectorySequenceAsync(traj);
+                releasedY1 = false;
+            } else if (!releasedY1) {
+                releasedY1 = true;
+            }
+
             if (gamepad1.dpad_up) {
                 if (releasedDU1) {
-                    increaseSpeed(0.1);
+                    increaseSpeed(RoombaConstants.SPEED_INCREMENT);
                     releasedDU1 = false;
                 }
             } else if (!releasedDU1) {
@@ -102,31 +121,18 @@ public class RoombaTeleOp extends LinearOpMode {
 
             if (gamepad1.dpad_down) {
                 if (releasedDD1) {
-                    decreaseSpeed(-0.1);
+                    decreaseSpeed(RoombaConstants.SPEED_INCREMENT);
                     releasedDD1 = false;
                 }
             } else if (!releasedDD1){
                 releasedDD1 = true;
             }
 
-            if (gamepad1.right_bumper) {
-                if (releasedRB1) {
-                    if (Pinch.getPosition() > 0.5) {
-                        Pinch.setPosition(0.03);
-                    } else {
-                        Pinch.setPosition(0.8);
-                    }
-                    releasedRB1 = false;
-                }
-            } else if (!releasedRB1) {
-                releasedRB1 = true;
-            }
-
             if (gamepad2.a) {
                 if (releasedA2) {
-                    Slide.setTargetPosition(SLIDE_INITIAL);
+                    Slide.setTargetPosition(slideInitial);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    Slide.setPower(0.7);
+                    Slide.setPower(1);
                     releasedA2 = false;
                 }
             } else if (!releasedA2) {
@@ -135,9 +141,9 @@ public class RoombaTeleOp extends LinearOpMode {
 
             if (gamepad2.b) {
                 if (releasedB2) {
-                    Slide.setTargetPosition(SLIDE_INITIAL + 1200);
+                    Slide.setTargetPosition(slideInitial + 1845);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    Slide.setPower(0.8);
+                    Slide.setPower(1);
                     releasedB2 = false;
                 }
             } else if (!releasedB2) {
@@ -146,9 +152,9 @@ public class RoombaTeleOp extends LinearOpMode {
 
             if (gamepad2.x) {
                 if (releasedX2) {
-                    Slide.setTargetPosition(SLIDE_INITIAL + 2000);
+                    Slide.setTargetPosition(slideInitial + 3640);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    Slide.setPower(0.8);
+                    Slide.setPower(1);
                     releasedX2 = false;
                 }
             } else if (!releasedX2) {
@@ -157,9 +163,9 @@ public class RoombaTeleOp extends LinearOpMode {
 
             if (gamepad2.y) {
                 if (releasedY2) {
-                    Slide.setTargetPosition(SLIDE_INITIAL + 2800);
+                    Slide.setTargetPosition(slideInitial + 5600);
                     Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-                    Slide.setPower(0.8);
+                    Slide.setPower(1);
                     releasedY2 = false;
                 }
             } else if (!releasedY2) {
@@ -168,7 +174,9 @@ public class RoombaTeleOp extends LinearOpMode {
 
             if (gamepad2.dpad_up) {
                 if (releasedDU2) {
-                    Slide.setTargetPosition(Slide.getCurrentPosition() + 105);
+                    Slide.setTargetPosition(Slide.getCurrentPosition() + 150);
+                    Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Slide.setPower(1);
                     releasedDU2 = false;
                 }
             } else if (!releasedDU2){
@@ -177,17 +185,18 @@ public class RoombaTeleOp extends LinearOpMode {
 
             if (gamepad2.dpad_down) {
                 if (releasedDD2) {
-                    Slide.setTargetPosition(Slide.getCurrentPosition() - 105);
+                    Slide.setTargetPosition(Slide.getCurrentPosition() - 150);
+                    Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                    Slide.setPower(1);
                     releasedDD2 = false;
                 }
             } else if (!releasedDD2) {
                 releasedDD2 = true;
             }
 
-            /*
             if (gamepad2.dpad_left) {
                 if (releasedDL2) {
-                    Turn.setPower(Roomba_Constants.TURN_MIN);
+                    Turn.setPower(-0.75);
                     releasedDL2 = false;
                 }
             } else if (!releasedDL2) {
@@ -197,7 +206,7 @@ public class RoombaTeleOp extends LinearOpMode {
 
             if (gamepad2.dpad_right) {
                 if (releasedDR2) {
-                    Turn.setPower(Roomba_Constants.TURN_MAX);
+                    Turn.setPower(0.75);
                     releasedDR2 = false;
                 }
             } else if (!releasedDR2) {
@@ -205,6 +214,7 @@ public class RoombaTeleOp extends LinearOpMode {
                 releasedDR2 = true;
             }
 
+            /*
             if (gamepad2.left_trigger > 0.9) { //&& Slide.getCurrentPosition() >= SLIDE_INITIAL + Roomba_Constants.SL_LOW
                 if (releasedLT2) {
                     if (Turn.getPosition() > Roomba_Constants.TURN_MIDPOINT) Turn.setPosition(Roomba_Constants.TURN_MIN);
@@ -216,17 +226,13 @@ public class RoombaTeleOp extends LinearOpMode {
             }
             */
 
-            if (gamepad2.right_bumper) {
-                if (releasedRB2) {
-                    if (Pinch.getPosition() > 0.5) {
-                        Pinch.setPosition(0.03);
-                    } else {
-                        Pinch.setPosition(0.8);
-                    }
-                    releasedRB2 = false;
+            if (gamepad2.left_bumper) {
+                if (releasedLB1) {
+                    slideInitial = Slide.getCurrentPosition();
+                    releasedLB1 = false;
                 }
-            } else if (!releasedRB2) {
-                releasedRB2 = true;
+            } else if (!releasedLB1) {
+                releasedLB1 = true;
             }
 
             LFPower = Range.clip(speed * (drive + rotate - strafe), -1.0, 1.0);
@@ -239,20 +245,13 @@ public class RoombaTeleOp extends LinearOpMode {
             LB.setPower(LBPower);
             RB.setPower(RBPower);
 
-            /*
-            if (Slide.getCurrentPosition() > SLIDE_INITIAL + 600) {
-                Turn.setPower(Range.clip(gamepad2.right_stick_x, Roomba_Constants.TURN_MIN, Roomba_Constants.TURN_MAX));
-            } else {
-                Turn.setPower(0);
-            }
-            */
+            Turn.setPower(Range.clip(gamepad2.right_stick_x, -1, 1));
 
             telemetry.addData("Front Motors", "LF (%.2f), RF (%.2f)", LFPower, RFPower);
             telemetry.addData("Back Motors", "LB (%.2f), RB (%.2f)", LBPower, RBPower);
             telemetry.addLine("Slide Current: " + Slide.getCurrentPosition());
             telemetry.addLine("Slide Target: " + Slide.getTargetPosition());
             telemetry.addLine("Turn: " + Turn.getPower());
-            telemetry.addLine("Pinch: " + Pinch.getPosition());
             telemetry.addData("Controller", "X (%.2f), Y (%.2f)", strafe, drive);
             telemetry.addData("Speed:", speed);
             telemetry.update();

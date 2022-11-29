@@ -15,7 +15,7 @@ public class MeepMeepTesting {
         MeepMeep meepMeep = new MeepMeep(700);
         RoadRunnerBotEntity redRight = new DefaultBotBuilder(meepMeep)
                 .setDriveTrainType(DriveTrainType.MECANUM)
-                .setConstraints(46.743540471846245, 46.743540471846245, 15.851832582393046, 4.373484018011914, 9.7)
+                .setConstraints(123, 123, toRadians(280), toRadians(280), 11.4)
                 .setDimensions(12.25, 15.75)
                 .followTrajectorySequence(drive ->
                         drive.trajectorySequenceBuilder(new Pose2d(-40.3, 62, toRadians(270)))
@@ -30,46 +30,17 @@ public class MeepMeepTesting {
                 );
         RoadRunnerBotEntity blueLeft = new DefaultBotBuilder(meepMeep)
                 .setDriveTrainType(DriveTrainType.MECANUM)
-                .setConstraints(60, 30, 7, Math.toRadians(60), 9.7)
+                .setConstraints(60, 55, 6.28, 6.28, 12.7)
                 .setDimensions(12.25, 15.75)
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(30, 61, toRadians(270)))
-                                .splineToLinearHeading(new Pose2d(34, 55.5, toRadians(180)), toRadians(0))
-                                .lineToSplineHeading(new Pose2d(33, 0, toRadians(180)))
-                                .splineToLinearHeading(new Pose2d(64, 12, toRadians(0)), toRadians(-70))
-                               // .lineToSplineHeading(new Pose2d(33, 12, toRadians(0)))
-
-                                /*
-                                .lineToSplineHeading(new Pose2d(64, 12, toRadians(0)))
-                                .lineToSplineHeading(new Pose2d(34, 12, toRadians(0)))
-                                .lineToSplineHeading(new Pose2d(29, 6, toRadians(225)))
-                                .lineToSplineHeading(new Pose2d(34, 12, toRadians(0)))
-                                .lineToSplineHeading(new Pose2d(64, 12, toRadians(0)))
-                                .lineToSplineHeading(new Pose2d(34, 12, toRadians(0)))
-                                .lineToSplineHeading(new Pose2d(29, 6, toRadians(225)))
-                                .lineToSplineHeading(new Pose2d(34, 12, toRadians(0)))
-                                .lineToSplineHeading(new Pose2d(64, 12, toRadians(0)))
-                                .lineToSplineHeading(new Pose2d(47, 15, toRadians(90)))
-
-                                 */
-
-                                .splineToSplineHeading(new Pose2d(23.5, 9, toRadians(270)), toRadians(-15))
-                                .waitSeconds(1)
-                                .back(4)
-
-                                .lineToSplineHeading(new Pose2d(64, 12, toRadians(0)))
-                                .lineToSplineHeading(new Pose2d(23.5, 13, toRadians(270)))
-                                .forward(4)
-                                .waitSeconds(1)
-                                .back(4)
-
-                                .lineToSplineHeading(new Pose2d(64, 12, toRadians(0)))
-                                .lineToSplineHeading(new Pose2d(23.5, 13, toRadians(270)))
-                                .forward(4)
-                                .waitSeconds(1)
-                                .back(4)
-
-                                .lineToSplineHeading(new Pose2d(61, 12, toRadians(180)))
+                        drive.trajectorySequenceBuilder(new Pose2d(30, 63.5, toRadians(270)))
+                                .lineToSplineHeading(new Pose2d(36, 55.5, toRadians(180)))
+                                .lineToSplineHeading(new Pose2d(34, 0, toRadians(180)))
+                                .forward(2)
+                                .lineToSplineHeading(new Pose2d(37, 11, toRadians(270)))
+                                .lineToSplineHeading(new Pose2d(62.5, 11, toRadians(0)))
+                                .lineToSplineHeading(new Pose2d(24, 10, toRadians(270)))
+                                .forward(3)
                                 .build()
                 );
 

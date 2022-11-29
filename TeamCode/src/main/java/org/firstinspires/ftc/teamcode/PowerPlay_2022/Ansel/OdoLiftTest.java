@@ -1,5 +1,6 @@
-package org.firstinspires.ftc.teamcode.PowerPlay_2022.Competition.Roomba.TeleOp;
+package org.firstinspires.ftc.teamcode.PowerPlay_2022.Ansel;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -7,11 +8,12 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp(name = "Roomba TeleOp Old", group = "Competition")
-public class RoombaTeleOp extends LinearOpMode {
+@Disabled
+@TeleOp(name = "OdoLiftTest", group = "test")
+public class OdoLiftTest extends LinearOpMode {
     private DcMotor LF, RF, LB, RB, Slide;
-    private CRServo Turn;
     private Servo Pinch;
+    private Servo OdoLift;
 
     private double speed = 0.5;
 
@@ -23,8 +25,7 @@ public class RoombaTeleOp extends LinearOpMode {
         LB = hardwareMap.get(DcMotor.class, "LB");
         RB = hardwareMap.get(DcMotor.class, "RB");
         Slide = hardwareMap.get(DcMotor.class, "Slide");
-
-        Turn = hardwareMap.get(CRServo.class, "Turn");
+        OdoLift = hardwareMap.get(Servo.class, "OdoLift");
         Pinch = hardwareMap.get(Servo.class, "Pinch");
 
         // Initialize devices
@@ -60,7 +61,7 @@ public class RoombaTeleOp extends LinearOpMode {
         waitForStart();
 
         // Gamepad 1
-        boolean releasedA1 = true, releasedB1 = true;
+        boolean releasedA1 = true, releasedB1 = true, releasedY1 = true, releasedX1 = true;
         boolean releasedDU1 = true, releasedDD1 = true;
         boolean releasedRB1 = true;
         boolean releasedLT1 = true;
@@ -89,6 +90,20 @@ public class RoombaTeleOp extends LinearOpMode {
                 releasedB1 = false;
             } else if (!releasedB1) {
                 releasedB1 = true;
+            }
+
+            if (gamepad1.x) {
+                OdoLift.setPosition(1);
+                releasedX1 = false;
+            } else if (!releasedX1) {
+                releasedX1 = true;
+            }
+
+            if (gamepad1.y) {
+                OdoLift.setPosition(0.56);
+                releasedY1 = false;
+            } else if (!releasedY1) {
+                releasedY1 = true;
             }
 
             if (gamepad1.dpad_up) {
@@ -251,8 +266,8 @@ public class RoombaTeleOp extends LinearOpMode {
             telemetry.addData("Back Motors", "LB (%.2f), RB (%.2f)", LBPower, RBPower);
             telemetry.addLine("Slide Current: " + Slide.getCurrentPosition());
             telemetry.addLine("Slide Target: " + Slide.getTargetPosition());
-            telemetry.addLine("Turn: " + Turn.getPower());
             telemetry.addLine("Pinch: " + Pinch.getPosition());
+            telemetry.addLine("OdoLift: " + OdoLift.getPosition());
             telemetry.addData("Controller", "X (%.2f), Y (%.2f)", strafe, drive);
             telemetry.addData("Speed:", speed);
             telemetry.update();

@@ -17,7 +17,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
-@TeleOp(name = "Roomba TeleOp w/ Recording", group = "Competition")
+@TeleOp(name = "Roomba TeleOp RR", group = "Competition")
 public class RoombaTeleOpRR extends LinearOpMode {
     private DcMotor Slide;
     private Servo Pinch;
@@ -36,8 +36,8 @@ public class RoombaTeleOpRR extends LinearOpMode {
 
         // Initialize others
         Slide = hardwareMap.get(DcMotor.class, "Slide");
-        Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Pinch = hardwareMap.get(Servo.class, "Pinch");
+        Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Pinch.setDirection(Servo.Direction.REVERSE);
 
         // Initialize DriveMethod
@@ -49,7 +49,7 @@ public class RoombaTeleOpRR extends LinearOpMode {
         Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Initalize recording
-        initOCVRecording();
+        // initOCVRecording();
 
         // Update telemetry
         telemetry.addData("Status", "Initialized");
@@ -133,7 +133,7 @@ public class RoombaTeleOpRR extends LinearOpMode {
 
             if (gamepad2.a && !gamepad1.start && !gamepad2.start) {
                 if (releasedA2) {
-                    driveMethod.slideTo(slideInitial, 0.85);
+                    driveMethod.slideTo(slideInitial, 0.9);
                     releasedA2 = false;
                 }
             } else if (!releasedA2) {
@@ -142,7 +142,7 @@ public class RoombaTeleOpRR extends LinearOpMode {
 
             if (gamepad2.b && !gamepad1.start && !gamepad2.start) {
                 if (releasedB2) {
-                    driveMethod.slideTo(slideInitial + RoombaConstants.SL_LOW, 0.85);
+                    driveMethod.slideTo(slideInitial + RoombaConstants.SL_LOW, 0.9);
                     releasedB2 = false;
                 }
             } else if (!releasedB2) {
@@ -151,7 +151,7 @@ public class RoombaTeleOpRR extends LinearOpMode {
 
             if (gamepad2.x) {
                 if (releasedX2) {
-                    driveMethod.slideTo(slideInitial + RoombaConstants.SL_MEDIUM, 0.85);
+                    driveMethod.slideTo(slideInitial + RoombaConstants.SL_MEDIUM, 0.9);
                     releasedX2 = false;
                 }
             } else if (!releasedX2) {
@@ -160,7 +160,7 @@ public class RoombaTeleOpRR extends LinearOpMode {
 
             if (gamepad2.y) {
                 if (releasedY2) {
-                    driveMethod.slideTo(slideInitial + RoombaConstants.SL_HIGH, 0.85);
+                    driveMethod.slideTo(slideInitial + RoombaConstants.SL_HIGH, 0.9);
                     releasedY2 = false;
                 }
             } else if (!releasedY2) {
@@ -169,7 +169,7 @@ public class RoombaTeleOpRR extends LinearOpMode {
 
             if (gamepad2.dpad_up) {
                 if (releasedDU2) {
-                    driveMethod.slideTo(Slide.getCurrentPosition() + 105, 0.85);
+                        driveMethod.slideTo(Slide.getCurrentPosition() + 105, 1.0);
                     releasedDU2 = false;
                 }
             } else if (!releasedDU2){
@@ -178,7 +178,7 @@ public class RoombaTeleOpRR extends LinearOpMode {
 
             if (gamepad2.dpad_down) {
                 if (releasedDD2) {
-                    driveMethod.slideTo(Slide.getCurrentPosition() - 105, 0.85);
+                    driveMethod.slideTo(Slide.getCurrentPosition() - 105, 1.0);
                     releasedDD2 = false;
                 }
             } else if (!releasedDD2) {
@@ -210,7 +210,7 @@ public class RoombaTeleOpRR extends LinearOpMode {
                     Range.clip(speed * (drive - rotate + strafe), -1.0, 1.0)
             );
 
-            telemetry.addData("Recording FPS", String.format("%.2f", Camera.getFps()));
+            // telemetry.addData("Recording FPS", String.format("%.2f", Camera.getFps()));
             telemetry.addLine("Slide Current: " + Slide.getCurrentPosition());
             telemetry.addLine("Slide Target: " + Slide.getTargetPosition());
             telemetry.addLine("Pinch: " + Pinch.getPosition());
@@ -218,7 +218,7 @@ public class RoombaTeleOpRR extends LinearOpMode {
             telemetry.addData("Speed:", speed);
             telemetry.update();
         }
-        Camera.stopRecordingPipeline();
+        // Camera.stopRecordingPipeline();
     }
 
     private void initOCVRecording() {

@@ -30,11 +30,11 @@ public class RoombaConstants {
 
     // Auto Constants
     public static final int[] CONE_HEIGHTS = { 425, 280 };
-    public static final Pose2d BLUE_LEFT_STARTING = new Pose2d(30, 61, toRadians(270));
+    public static final Pose2d BLUE_LEFT_STARTING = new Pose2d(30, 63.5, toRadians(270));
     public static final Pose2d BLUE_LEFT_INITIAL_STRAFE = new Pose2d(36, 55.5, toRadians(180));
-    public static final Pose2d BLUE_LEFT_END_STRAFE = new Pose2d(37.5, 0, toRadians(180));
-    public static final Pose2d BLUE_LEFT_MIDPOINT = new Pose2d(38, 12, toRadians(0));
-    public static final Pose2d BLUE_LEFT_CONE = new Pose2d(63, 12, toRadians(0));
+    public static final Pose2d BLUE_LEFT_END_STRAFE = new Pose2d(34, 0, toRadians(180));
+    public static final Pose2d BLUE_LEFT_MIDPOINT = new Pose2d(37, 11.5, toRadians(270));
+    public static final Pose2d BLUE_LEFT_CONE = new Pose2d(62.5, 11.5, toRadians(0));
     public static final Pose2d BLUE_LEFT_HIGH_JUNC = new Pose2d(32, 7, toRadians(253));
 
     public static final Pose2d RED_RIGHT_STARTING = new Pose2d(-40, 62, toRadians(270));

@@ -12,8 +12,8 @@ import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.firstinspires.ftc.teamcode.FreightFrenzy_2021.roadrunner.drive.*;
-import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
+
+
 
 @Autonomous(name = "Trajectory Test", group = "4100")
 @Disabled
@@ -33,7 +33,7 @@ public class Trajectory_Test extends LinearOpMode {
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
     private static final String VUFORIA_KEY =
-            Robot4100Common.VUFORIA_LICENSE;
+           null;
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
 
@@ -41,7 +41,7 @@ public class Trajectory_Test extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         //Initialize chassis
-        SampleMecanumDrive_Chassis1 drive = new SampleMecanumDrive_Chassis1(hardwareMap);
+
 
         // Initialize the hardware variables.
         Hand = hardwareMap.get(Servo.class, "hand");
@@ -83,17 +83,7 @@ public class Trajectory_Test extends LinearOpMode {
         Pose2d initialPose = new Pose2d();
         //drive.setPoseEstimate(initialPose);
         /////////////// Trajectories ///////////////
-        Trajectory traj1 = drive.trajectoryBuilder(new Pose2d())
-                .forward(30)
-                .build();
 
-        Trajectory traj2 = drive.trajectoryBuilder(traj1.end())
-                .strafeLeft(10)
-                .build();
-
-        Trajectory trajAlt = drive.trajectoryBuilder(new Pose2d())
-                .splineTo(new Vector2d(30, 10), 0)
-                .build();
 
         telemetry.addData(">", "Press Play to start op mode");
         telemetry.update();
@@ -102,13 +92,8 @@ public class Trajectory_Test extends LinearOpMode {
 
         if (opModeIsActive()) {
             //Two straight paths
-            drive.followTrajectory(traj1);
-            Pose2d poseEstimate = drive.getPoseEstimate();
-            telemetry.addData("X", poseEstimate.getX());
-            telemetry.addData("Y", poseEstimate.getY());
-            telemetry.addData("Heading", poseEstimate.getHeading());
-            telemetry.update();
-            drive.followTrajectory(traj2);
+
+
 
             //One curvy trajectory
             //drive.followTrajectory(trajAlt);

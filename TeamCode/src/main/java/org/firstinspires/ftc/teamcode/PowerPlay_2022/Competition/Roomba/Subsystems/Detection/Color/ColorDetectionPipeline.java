@@ -17,10 +17,11 @@ public class ColorDetectionPipeline extends OpenCvPipeline {
         CENTER,
         RIGHT
     }
-
-    private static final Point SLEEVE_TOPLEFT_ANCHOR_POINT = new Point(320, 0);
-    public static int REGION_WIDTH = 210;
-    public static int REGION_HEIGHT = 180;
+                                                                        //300
+    private static final Point SLEEVE_TOPLEFT_ANCHOR_POINT = new Point(250, 50);
+    public static int REGION_WIDTH = 125; // 225 in striker
+    public static int REGION_HEIGHT = 200;
+                                    //370 in striker
 
     private final Scalar
             // PUMPKIN = new Scalar(255, 100, 0),
@@ -33,7 +34,7 @@ public class ColorDetectionPipeline extends OpenCvPipeline {
     Point topLeftPt = new Point(SLEEVE_TOPLEFT_ANCHOR_POINT.x, SLEEVE_TOPLEFT_ANCHOR_POINT.y);
     Point bottomRightPt = new Point(SLEEVE_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH, SLEEVE_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
 
-    private volatile ParkingPosition position = ParkingPosition.CENTER;
+    private volatile ParkingPosition position = ParkingPosition.LEFT;
 
     @Override
     public Mat processFrame(Mat input) {

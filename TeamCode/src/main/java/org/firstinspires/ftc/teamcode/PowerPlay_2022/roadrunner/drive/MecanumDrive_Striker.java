@@ -38,17 +38,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.DriveConstants_Roomba.*;
+import static org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.DriveConstants_Striker.encoderTicksToInches;
+import static org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.DriveConstants_Striker.*;
 
 /*
  * Simple mecanum drive hardware implementation for REV hardware.
  */
 @Config
-public class MecanumDrive_Roomba extends MecanumDrive {
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(5, 0, 0); // 5
-    public static PIDCoefficients HEADING_PID = new PIDCoefficients(10, 0, 0); // 8
+public class MecanumDrive_Striker extends MecanumDrive {
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(6, 0, 0);
+    public static PIDCoefficients HEADING_PID = new PIDCoefficients(7, 0, 0);
 
-    public static double LATERAL_MULTIPLIER = 1.163920664221537; // 1.180052306489688
+    public static double LATERAL_MULTIPLIER = 1.15;
 
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
@@ -67,11 +68,11 @@ public class MecanumDrive_Roomba extends MecanumDrive {
     private BNO055IMU imu;
     private VoltageSensor batteryVoltageSensor;
 
-    public MecanumDrive_Roomba(HardwareMap hardwareMap) {
+    public MecanumDrive_Striker(HardwareMap hardwareMap) {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
 
         follower = new HolonomicPIDVAFollower(TRANSLATIONAL_PID, TRANSLATIONAL_PID, HEADING_PID,
-                new Pose2d(0.8, 0.8, Math.toRadians(4.0)), 0.8);
+                new Pose2d(0.5, 0.5, Math.toRadians(5.0)), 1);
 
         LynxModuleUtil.ensureMinimumFirmwareVersion(hardwareMap);
 
@@ -107,7 +108,7 @@ public class MecanumDrive_Roomba extends MecanumDrive {
         // and the placement of the dot/orientation from https://docs.revrobotics.com/rev-control-system/control-system-overview/dimensions#imu-location
         //
         // For example, if +Y in this diagram faces downwards, you would use AxisDirection.NEG_Y.
-        BNO055IMUUtil.remapZAxis(imu, AxisDirection.POS_Y);
+        BNO055IMUUtil.remapZAxis(imu, AxisDirection.NEG_Z);
 
         leftFront = hardwareMap.get(DcMotorEx.class, "LF");
         leftRear = hardwareMap.get(DcMotorEx.class, "LB");
@@ -134,12 +135,14 @@ public class MecanumDrive_Roomba extends MecanumDrive {
 
         // TODO: reverse any motors using DcMotor.setDirection()
 
+        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        leftRear.setDirection(DcMotorSimple.Direction.FORWARD);
         rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
         rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
 
         // TODO: if desired, use setLocalizer() to change the localization method
         // for instance, setLocalizer(new ThreeTrackingWheelLocalizer(...));
-        setLocalizer(new TwoWheelTrackingLocalizer(hardwareMap, this));
+        // setLocalizer(new TwoWheelTrackingLocalizer(hardwareMap, this));
 
         trajectorySequenceRunner = new TrajectorySequenceRunner(follower, HEADING_PID);
     }
@@ -198,8 +201,6 @@ public class MecanumDrive_Roomba extends MecanumDrive {
         followTrajectorySequenceAsync(trajectorySequence);
         waitForIdle();
     }
-
-    public void breakFollowing() { trajectorySequenceRunner.breakFollowing(); }
 
     public Pose2d getLastError() {
         return trajectorySequenceRunner.getLastPoseError();

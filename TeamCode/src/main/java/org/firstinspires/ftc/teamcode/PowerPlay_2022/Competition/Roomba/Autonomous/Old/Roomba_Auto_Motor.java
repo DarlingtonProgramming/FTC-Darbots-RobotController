@@ -14,7 +14,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.Competition.Roomba.Settings.RoombaConstants;
-import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
+
 
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class Roomba_Auto_Motor extends LinearOpMode {
             "2 Bulb",
             "3 Panel"
     };
-    private static final String VUFORIA_KEY = Robot4100Common.VUFORIA_LICENSE;
+    private static final String VUFORIA_KEY =null;
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
 

@@ -6,23 +6,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.Competition.PoseStorage;
-import org.firstinspires.ftc.teamcode.PowerPlay_2022.Competition.Roomba.Subsystems.RecordingPipeline;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.Competition.Roomba.Subsystems.RoombaDriveMethod;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.Competition.Roomba.Settings.RoombaConstants;
 import org.firstinspires.ftc.teamcode.PowerPlay_2022.roadrunner.drive.MecanumDrive_Roomba;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvWebcam;
 
-@TeleOp(name = "Roomba TeleOp RR", group = "Competition")
+@TeleOp(name = "Roomba TeleOp", group = "Competition")
 public class RoombaTeleOpRR extends LinearOpMode {
     private DcMotor Slide;
-    private Servo Pinch;
-    private OpenCvWebcam Camera;
-    private WebcamName Webcam;
+    private Servo Pinch, OdoLift;
 
     private double speed = RoombaConstants.INITIAL_SPEED;
 
@@ -39,6 +31,7 @@ public class RoombaTeleOpRR extends LinearOpMode {
         Pinch = hardwareMap.get(Servo.class, "Pinch");
         Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Pinch.setDirection(Servo.Direction.REVERSE);
+        OdoLift.setPosition(RoombaConstants.ODOLIFT_UP);
 
         // Initialize DriveMethod
         RoombaDriveMethod driveMethod = new RoombaDriveMethod(chassis, Slide, Pinch);
@@ -47,9 +40,6 @@ public class RoombaTeleOpRR extends LinearOpMode {
         int slideInitial = Slide.getCurrentPosition();
         Slide.setTargetPosition(slideInitial);
         Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        // Initalize recording
-        // initOCVRecording();
 
         // Update telemetry
         telemetry.addData("Status", "Initialized");
@@ -70,7 +60,6 @@ public class RoombaTeleOpRR extends LinearOpMode {
         boolean releasedLT2 = true, releasedRT2 = true;
 
         while (opModeIsActive()) {
-
             double drive = -gamepad1.left_stick_y;
             double strafe  = -gamepad1.left_stick_x;
             double rotate = gamepad1.right_stick_x;
@@ -87,21 +76,6 @@ public class RoombaTeleOpRR extends LinearOpMode {
                 releasedB1 = false;
             } else if (!releasedB1) {
                 releasedB1 = true;
-            }
-
-            if (gamepad1.y) {
-//                TrajectorySequence traj = chassis.trajectorySequenceBuilder(chassis.getPoseEstimate())
-//                        .addDisplacementMarker(() -> {
-//                            Slide.setTargetPosition(slideInitial + 285);
-//                            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-//                            Slide.setPower(0.7);
-//                        })
-//                        .lineToSplineHeading(new Pose2d(64, 12, toRadians(0)))
-//                        .build();
-//                chassis.followTrajectorySequenceAsync(traj);
-                releasedY1 = false;
-            } else if (!releasedY1) {
-                releasedY1 = true;
             }
 
             if (gamepad1.dpad_up) {
@@ -210,7 +184,6 @@ public class RoombaTeleOpRR extends LinearOpMode {
                     Range.clip(speed * (drive - rotate + strafe), -1.0, 1.0)
             );
 
-            // telemetry.addData("Recording FPS", String.format("%.2f", Camera.getFps()));
             telemetry.addLine("Slide Current: " + Slide.getCurrentPosition());
             telemetry.addLine("Slide Target: " + Slide.getTargetPosition());
             telemetry.addLine("Pinch: " + Pinch.getPosition());
@@ -218,29 +191,6 @@ public class RoombaTeleOpRR extends LinearOpMode {
             telemetry.addData("Speed:", speed);
             telemetry.update();
         }
-        // Camera.stopRecordingPipeline();
-    }
-
-    private void initOCVRecording() {
-        this.Webcam = hardwareMap.get(WebcamName.class, "Webcam 1");
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        Camera = OpenCvCameraFactory.getInstance().createWebcam(Webcam, cameraMonitorViewId);
-
-        Camera.setPipeline(new RecordingPipeline(this.Camera));
-        Camera.setViewportRenderingPolicy(OpenCvWebcam.ViewportRenderingPolicy.OPTIMIZE_VIEW);
-        Camera.setViewportRenderer(OpenCvWebcam.ViewportRenderer.GPU_ACCELERATED);
-        Camera.openCameraDeviceAsync(new OpenCvWebcam.AsyncCameraOpenListener() {
-            @Override
-            public void onOpened() {
-                Camera.startStreaming(RoombaConstants.OCV_RECORDING_WIDTH, RoombaConstants.OCV_RECORDING_HEIGHT, OpenCvCameraRotation.UPRIGHT);
-            }
-
-            @Override
-            public void onError(int errorCode) {
-                telemetry.addLine("Could not start recording.");
-                telemetry.update();
-            }
-        });
     }
 
     private void decreaseSpeed(double s) {

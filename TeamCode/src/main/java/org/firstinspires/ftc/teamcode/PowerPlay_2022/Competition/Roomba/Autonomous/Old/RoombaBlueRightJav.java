@@ -167,19 +167,7 @@ public class RoombaBlueRightJav extends LinearOpMode {
                     .build();
             drive.followTrajectorySequence(juncTraj7);
             while (drive.isBusy()) sleep(150);
-/*
-            TrajectorySequence juncTraj6 = drive.trajectorySequenceBuilder(juncTraj5.end())
-                    .forward(0.1)          //goes to the blue tape but not all the way
-                    .build();
-            drive.followTrajectorySequence(juncTraj6);
-            while (drive.isBusy()) sleep(50);
 
-            TrajectorySequence juncTraj7 = drive.trajectorySequenceBuilder(juncTraj6.end())
-                    .forward(9.8)           //goes to the stack of blue cones
-                    .build();
-            drive.followTrajectorySequence(juncTraj7);
-            while (drive.isBusy()) sleep(10);
-*/
             Slide.setTargetPosition(SLIDE_INITIAL + 400); //Makes sure to move to correct position
             Slide.setPower(0.9);
             Pinch.setPosition(0.7);      //pinch closes

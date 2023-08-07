@@ -21,7 +21,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import org.firstinspires.ftc.robotcore.internal.system.AppUtil;
-import org.firstinspires.ftc.teamcode.robot_common.Robot4100Common;
+
 
 import java.io.File;
 import java.util.List;
@@ -50,7 +50,7 @@ public class Chassis_Auto2 extends LinearOpMode {
     private static final String LABEL_FIRST_ELEMENT = "Quad";
     private static final String LABEL_SECOND_ELEMENT = "Single";
     private static final String VUFORIA_KEY =
-            Robot4100Common.VUFORIA_LICENSE;
+           null;
     private VuforiaLocalizer vuforia;
     private TFObjectDetector tfod;
 

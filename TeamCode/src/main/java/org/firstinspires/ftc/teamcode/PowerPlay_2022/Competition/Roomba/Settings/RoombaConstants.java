@@ -29,7 +29,7 @@ public class RoombaConstants {
      public static final double CONFIDENCE_LEVEL = 0.5f;
 
     // Auto Constants
-    public static final int[] CONE_HEIGHTS = { 425, 280 };
+    public static final int[] CONE_HEIGHTS = { 450, 350 };
     public static final Pose2d BLUE_LEFT_STARTING = new Pose2d(30, 63.5, toRadians(270));
     public static final Pose2d BLUE_LEFT_INITIAL_STRAFE = new Pose2d(36, 55.5, toRadians(180));
     public static final Pose2d BLUE_LEFT_END_STRAFE = new Pose2d(34, 0, toRadians(180));
@@ -51,11 +51,14 @@ public class RoombaConstants {
     public static final double SPEED_INCREMENT = 0.1;
 
     // Components Constants
-    public static final double PINCH_MIN = 0.03;
-    public static final double PINCH_MAX = 0.8;
+    public static final double PINCH_MIN = 0.14;
+    public static final double PINCH_MAX = 0.9;
     public static final double PINCH_MIDPOINT = (PINCH_MAX + PINCH_MIN) / 2;
 
     public static final int SL_LOW = 1200;
     public static final int SL_MEDIUM = 2000;
     public static final int SL_HIGH = 2800;
+
+    public static final double ODOLIFT_UP = 0.8;
+    public static final double ODOLIFT_DOWN = 0.59;
 }
